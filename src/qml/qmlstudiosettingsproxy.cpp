@@ -129,7 +129,8 @@ QVariantMap QmlStudioSettingsProxy::recordingSettings() const {
     result.insert(QStringLiteral("fileSize"), s_pConfig->getValueString(kFileSizeKey));
 
     QVariantList formats;
-    for (const auto& format : EncoderFactory::getFactory().getFormats()) {
+    const QList<Encoder::Format> allFormats = EncoderFactory::getFactory().getFormats();
+    for (const auto& format : allFormats) {
         if (isFormatUsable(format.internalName)) {
             formats.append(option(format.label, format.internalName));
         }
@@ -166,7 +167,8 @@ QVariantMap QmlStudioSettingsProxy::recordingQuality(const QString& encoding) co
         return result;
     }
     QVariantList labels;
-    for (int value : pSettings->getQualityValues()) {
+    const QList<int> qualityValues = pSettings->getQualityValues();
+    for (int value : qualityValues) {
         labels.append(QStringLiteral("%1 kbps").arg(value));
     }
     result.insert(QStringLiteral("available"), !labels.isEmpty());
