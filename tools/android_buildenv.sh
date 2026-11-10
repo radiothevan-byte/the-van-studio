@@ -109,6 +109,35 @@ case "$1" in
         export MIXXX_VCPKG_ROOT="${BUILDENV_PATH}"
         export VCPKG_TARGET_TRIPLET="${VCPKG_TARGET_TRIPLET}"
 
+        # THE VAN STUDIO [AI-generated, start]: the single CMake download of
+        # the ~GB build environment from downloads.mixxx.org is often cut off
+        # on CI ("SHA256 checksum mismatch"). Fetch it here with resume and
+        # retries, verify it, and let CMake reuse the file.
+        if [ ! -d "${BUILDENV_PATH}" ]; then
+            mkdir -p "${BUILDENV_BASEPATH}"
+            BUILDENV_ZIP="${BUILDENV_BASEPATH}/${BUILDENV_NAME}.zip"
+            for attempt in 1 2 3 4 5 6; do
+                echo "Downloading build environment (attempt ${attempt})..."
+                curl -fL --retry 10 --retry-delay 15 --retry-all-errors \
+                    --connect-timeout 30 -C - -o "${BUILDENV_ZIP}" "${BUILDENV_URL}" || true
+                if echo "${BUILDENV_SHA256}  ${BUILDENV_ZIP}" | sha256sum -c --status; then
+                    echo "Build environment downloaded and verified."
+                    break
+                fi
+                if [ "${attempt}" -ge 3 ]; then
+                    # Resuming may keep reusing a corrupt partial file
+                    rm -f "${BUILDENV_ZIP}"
+                fi
+                sleep 20
+            done
+            if ! echo "${BUILDENV_SHA256}  ${BUILDENV_ZIP}" | sha256sum -c --status; then
+                echo "ERROR: could not download a valid build environment"
+                rm -f "${BUILDENV_ZIP}"
+                return 1 2>/dev/null || exit 1
+            fi
+        fi
+        # [AI-generated, end]
+
         echo_exported_variables() {
             echo "ANDROID_SDK=${ANDROID_SDK}"
             echo "ANDROID_NDK_HOME=${ANDROID_NDK_HOME}"
