@@ -19,6 +19,12 @@ class QQuickWindow;
 class APerformanceHintSession;
 #endif
 
+#if defined(Q_OS_ANDROID)
+namespace mixxx {
+class AndroidStudioService;
+} // namespace mixxx
+#endif
+
 namespace mixxx {
 namespace qml {
 
@@ -74,6 +80,8 @@ class QmlApplication : public QObject {
     // drops
     PerformanceTimer m_frameTimer;
     APerformanceHintSession* m_perfSession;
+    // THE VAN STUDIO [AI-generated]: updates the Android "live" notification
+    std::unique_ptr<::mixxx::AndroidStudioService> m_pStudioService;
 #endif
 };
 

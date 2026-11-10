@@ -25,6 +25,7 @@
 #include "qml/qmlcoreservices.h"
 #include "qml/qmldlgpreferencesproxy.h"
 #include "qml/qmlrecordingproxy.h"
+#include "qml/qmlstudiosettingsproxy.h"
 #include "soundio/soundmanager.h"
 #include "util/versionstore.h"
 #include "waveform/guitick.h"
@@ -35,6 +36,9 @@
 #include <android/api-level.h>
 #include <android/log.h>
 #include <android/performance_hint.h>
+#include <dlfcn.h>
+
+#include "util/androidstudioservice.h"
 
 #include <QDir>
 #include <QFile>
@@ -220,6 +224,12 @@ QmlApplication::QmlApplication(
         exit(-1);
     }
 
+#if defined(Q_OS_ANDROID)
+    // THE VAN STUDIO [AI-generated]: the broadcast and recording controls
+    // exist now, so the notification can follow them.
+    m_pStudioService = std::make_unique<::mixxx::AndroidStudioService>();
+#endif
+
     SoundDeviceStatus result = m_pCoreServices->getSoundManager()->setupDevices();
     if (result != SoundDeviceStatus::Ok) {
         const int reInt = static_cast<int>(result);
@@ -315,6 +325,13 @@ QmlApplication::QmlApplication(
     QmlDlgPreferencesProxy::s_pInstance =
             std::make_unique<QmlDlgPreferencesProxy>(pDlgPreferences, this);
     QmlRecordingProxy::s_pRecordingManager = m_pCoreServices->getRecordingManager();
+    // THE VAN STUDIO [AI-generated]: broadcast & recording settings for QML
+#ifdef __BROADCAST__
+    QmlStudioSettingsProxy::initialize(m_pCoreServices->getSettings(),
+            m_pCoreServices->getSettingsManager()->broadcastSettings());
+#else
+    QmlStudioSettingsProxy::initialize(m_pCoreServices->getSettings());
+#endif
     QmlApplicationProxy::registerReloadCallback([this]() {
         QTimer::singleShot(0, this, [this]() {
             loadQml(m_mainFilePath);
@@ -361,17 +378,28 @@ QmlApplication::QmlApplication(
             });
 
 #if defined(Q_OS_ANDROID)
+    // THE VAN STUDIO [AI-generated, start]: the performance hint API is
+    // optional on some Android 13/14 devices, so a missing manager or session
+    // is not an error. APerformanceHint_setPreferPowerEfficiency() only exists
+    // on Android 15 (API 35), so it is looked up at runtime instead of being
+    // linked directly, which keeps the APK loadable on Android 13.
+    // [AI-generated, end]
     APerformanceHintManager* manager = APerformanceHint_getManager();
-    VERIFY_OR_DEBUG_ASSERT(manager) {
+    if (!manager) {
+        __android_log_print(ANDROID_LOG_WARN, "mixxx", "ADPF not available on this device");
         return;
     }
     int32_t thread32 = gettid();
     m_perfSession = APerformanceHint_createSession(manager, &thread32, 1, 1e9 / 60);
-    VERIFY_OR_DEBUG_ASSERT(m_perfSession) {
+    if (!m_perfSession) {
         __android_log_print(ANDROID_LOG_WARN, "mixxx", "unable to create a ADPF session!");
-    }
-    else {
-        APerformanceHint_setPreferPowerEfficiency(m_perfSession, false);
+    } else {
+        using SetPreferPowerEfficiencyFn = int (*)(APerformanceHintSession*, bool);
+        auto setPreferPowerEfficiency = reinterpret_cast<SetPreferPowerEfficiencyFn>(
+                dlsym(RTLD_DEFAULT, "APerformanceHint_setPreferPowerEfficiency"));
+        if (setPreferPowerEfficiency) {
+            setPreferPowerEfficiency(m_perfSession, false);
+        }
         __android_log_print(ANDROID_LOG_VERBOSE, "mixxx", "ADPF session ready");
     }
 #endif
@@ -398,7 +426,7 @@ void QmlApplication::slotFrameSwapped() {
     }
 #endif
 #if defined(Q_OS_ANDROID)
-    VERIFY_OR_DEBUG_ASSERT(m_perfSession) {
+    if (!m_perfSession) {
         return;
     }
     auto lastFrameDurationNs = m_frameTimer.elapsed().toIntegerNanos();
@@ -417,6 +445,7 @@ QmlApplication::~QmlApplication() {
     m_pAppEngine.reset();
     // Delete all the QML singletons in order to prevent leak detection in CoreService
     QmlRecordingProxy::s_pRecordingManager.reset();
+    QmlStudioSettingsProxy::shutdown();
     QmlDlgPreferencesProxy::s_pInstance.reset();
     if (m_ownsWaveformWidgetFactory) {
         WaveformWidgetFactory::destroy();

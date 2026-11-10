@@ -77,7 +77,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL Android)
   endif()
   set(ANDROID_ABI arm64-v8a)
   set(ANDROID_NDK_HOST_SYSTEM_NAME linux-x86_64)
-  set(CMAKE_SYSTEM_VERSION 35) # API level
+  # THE VAN STUDIO [AI-generated, start]: build native code for Android 13
+  # (API 33) so the APK installs on Android 13 and newer. The compile/target SDK
+  # stays at 35 (see tools/android_buildenv.sh). [AI-generated, end]
+  set(CMAKE_SYSTEM_VERSION 33) # API level (minimum supported Android version)
   set(ANDROID_PLATFORM "android-${CMAKE_SYSTEM_VERSION}")
   set(ANDROID_API_VERSION "android-${CMAKE_SYSTEM_VERSION}")
   set(CMAKE_ANDROID_ARCH_ABI "${ANDROID_ABI}") # or x86_64, armeabi-v7a, etc.
@@ -2387,6 +2390,10 @@ if(ANDROID)
   set_target_properties(mixxx PROPERTIES QT_ANDROID_PACKAGE_NAME "org.mixxx")
   set_target_properties(
     mixxx
+    PROPERTIES QT_ANDROID_MIN_SDK_VERSION 33 QT_ANDROID_TARGET_SDK_VERSION 35
+  )
+  set_target_properties(
+    mixxx
     PROPERTIES QT_ANDROID_VERSION_NAME "${MIXXX_VERSION}"
   )
   set_target_properties(
@@ -4021,6 +4028,7 @@ if(QML)
       src/qml/qmlplayermanagerproxy.cpp
       src/qml/qmlplayerproxy.cpp
       src/qml/qmlrecordingproxy.cpp
+      src/qml/qmlstudiosettingsproxy.cpp # THE VAN STUDIO [AI-generated]
       src/qml/qmlsidebarmodelproxy.cpp
       src/qml/qmllibrarytracklistcolumn.cpp
       src/qml/qmltrackproxy.cpp
@@ -4054,6 +4062,11 @@ if(QML)
       # needed for qml/qmlautoreload.cpp
       src/util/autofilereloader.cpp
   )
+
+  # THE VAN STUDIO [AI-generated]: Android foreground-service notification
+  if(ANDROID)
+    target_sources(mixxx-qml-lib PRIVATE src/util/androidstudioservice.cpp)
+  endif()
 
   if(STEM)
     target_compile_definitions(mixxx-qml-lib PUBLIC __STEM__)
