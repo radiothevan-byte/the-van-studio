@@ -5094,8 +5094,13 @@ endif()
 
 # Lilv (LV2)
 find_package(lilv)
-# THE VAN STUDIO [AI-generated]: LV2 is off on Android because the prebuilt
-# libzix (used by lilv) needs copy_file_range(), which only exists on API 34+.
+# THE VAN STUDIO [AI-generated]: LV2 is forced off on Android, even if
+# -DLILV=ON is passed (the CI does), because the prebuilt libzix used by lilv
+# needs copy_file_range(), which only exists from API 34 (Android 14).
+if(ANDROID AND LILV)
+  message(STATUS "LV2 (LILV) is not supported on Android 13 builds, disabling")
+  set(LILV OFF CACHE BOOL "Lilv (LV2) support" FORCE)
+endif()
 default_option(LILV "Lilv (LV2) support" "lilv_FOUND;NOT ANDROID")
 if(LILV)
   if(NOT lilv_FOUND)
