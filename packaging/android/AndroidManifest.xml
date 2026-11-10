@@ -27,7 +27,7 @@
         android:normalScreens="true"
         android:smallScreens="true" />
     <application
-        android:name="org.qtproject.qt.android.bindings.QtApplication"
+        android:name="org.mixxx.StudioApplication"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Mixxx"
