@@ -2438,11 +2438,70 @@ if(ANDROID)
     "${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST_SYSTEM_NAME}/bin/clang++"
   )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+  # THE VAN STUDIO [AI-generated, start]
+  # Android 13 support: the prebuilt Qt libraries reference libc functions
+  # that only exist from API 34 (e.g. copy_file_range), so libQt6Core fails to
+  # load on Android 13. A tiny shim library provides them, and libQt6Core is
+  # patched to depend on it so the dynamic linker finds the symbols there.
+  add_library(vanstudio_compat SHARED src/util/android_compat.c)
+  set_target_properties(
+    vanstudio_compat
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
+  add_dependencies(mixxx vanstudio_compat)
+  find_program(PATCHELF_EXECUTABLE patchelf)
+  if(NOT PATCHELF_EXECUTABLE)
+    message(
+      FATAL_ERROR
+      "patchelf is required for Android 13 support (apt install patchelf)"
+    )
+  endif()
+  set(_vanstudio_qtcore_candidates "")
+  if(Qt6Core_DIR)
+    file(
+      GLOB _vanstudio_qtcore_candidates
+      "${Qt6Core_DIR}/../../lib/libQt6Core_*.so"
+    )
+  endif()
+  if(NOT _vanstudio_qtcore_candidates)
+    file(
+      GLOB _vanstudio_qtcore_candidates
+      "${MIXXX_VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/lib/libQt6Core_*.so"
+    )
+  endif()
+  if(NOT _vanstudio_qtcore_candidates)
+    message(FATAL_ERROR "libQt6Core_*.so not found, cannot apply the Android 13 shim")
+  endif()
+  foreach(_vanstudio_qtcore IN LISTS _vanstudio_qtcore_candidates)
+    execute_process(
+      COMMAND "${PATCHELF_EXECUTABLE}" --print-needed "${_vanstudio_qtcore}"
+      OUTPUT_VARIABLE _vanstudio_needed
+      RESULT_VARIABLE _vanstudio_result
+    )
+    if(NOT _vanstudio_result EQUAL 0)
+      message(FATAL_ERROR "patchelf failed to read ${_vanstudio_qtcore}")
+    endif()
+    if(_vanstudio_needed MATCHES "libvanstudio_compat\\.so")
+      message(STATUS "Android 13 shim already linked into ${_vanstudio_qtcore}")
+    else()
+      execute_process(
+        COMMAND
+          "${PATCHELF_EXECUTABLE}" --add-needed libvanstudio_compat.so
+          "${_vanstudio_qtcore}"
+        RESULT_VARIABLE _vanstudio_result
+      )
+      if(NOT _vanstudio_result EQUAL 0)
+        message(FATAL_ERROR "patchelf failed to patch ${_vanstudio_qtcore}")
+      endif()
+      message(STATUS "Linked Android 13 shim into ${_vanstudio_qtcore}")
+    endif()
+  endforeach()
+  # [AI-generated, end]
   set_target_properties(
     mixxx
     PROPERTIES
       QT_ANDROID_EXTRA_LIBS
-        ${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST_SYSTEM_NAME}/lib/clang/18/lib/linux/aarch64/libomp.so
+        "${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/${ANDROID_NDK_HOST_SYSTEM_NAME}/lib/clang/18/lib/linux/aarch64/libomp.so;${CMAKE_CURRENT_BINARY_DIR}/libvanstudio_compat.so"
   )
   add_custom_target(
     copy-resource-android

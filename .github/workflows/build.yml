@@ -473,6 +473,12 @@ jobs:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
 
+      # THE VAN STUDIO [AI-generated]: report native symbols that Android 13 lacks
+      - name: "[android] Check native libraries against Android 13 (API 33)"
+        if: startsWith(matrix.artifacts_slug, 'android')
+        continue-on-error: true
+        run: python3 tools/check_android_api_level.py build/android-build/libs/arm64-v8a "${ANDROID_NDK_HOME}" 33
+
       - name: "[Ubuntu/macOS] Print compiler cache stats"
         if: runner.os != 'windows'
         run: |
