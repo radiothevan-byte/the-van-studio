@@ -5094,7 +5094,9 @@ endif()
 
 # Lilv (LV2)
 find_package(lilv)
-default_option(LILV "Lilv (LV2) support" "lilv_FOUND")
+# THE VAN STUDIO [AI-generated]: LV2 is off on Android because the prebuilt
+# libzix (used by lilv) needs copy_file_range(), which only exists on API 34+.
+default_option(LILV "Lilv (LV2) support" "lilv_FOUND;NOT ANDROID")
 if(LILV)
   if(NOT lilv_FOUND)
     message(
