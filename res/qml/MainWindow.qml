@@ -108,13 +108,86 @@ Item {
             id: toolbar
 
             color: Theme.toolbarBackgroundColor
-            height: 36
+            height: 56
             radius: 1
             width: parent.width
 
             RowLayout {
                 anchors.fill: parent
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 8
 
+                // THE VAN STUDIO [AI-generated, start]: brand and the
+                // ON AIR / REC controls on the left. Stopping either needs a
+                // press-and-hold (see StudioHoldButton.qml). The MIC button is
+                // deliberately on the opposite (right) end of this bar so it
+                // cannot be hit by mistake next to ON AIR / REC.
+                Column {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.rightMargin: 6
+
+                    Text {
+                        color: Theme.accentColor
+                        font.bold: true
+                        font.family: Theme.fontFamily
+                        font.letterSpacing: 2
+                        font.pixelSize: 9
+                        text: "RADIO ON WHEELS"
+                    }
+                    Text {
+                        color: Theme.textColor
+                        font.bold: true
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 17
+                        text: "THE VAN STUDIO"
+                    }
+                }
+                Skin.StudioHoldButton {
+                    id: onAirButton
+
+                    Layout.alignment: Qt.AlignVCenter
+                    active: studioBroadcastEnabled.value > 0
+                    text: active ? "● ON AIR" : "● " + qsTr("GO LIVE")
+                    visible: Mixxx.Application.liveBroadcastingAvailable
+
+                    onStartRequested: studioBroadcastEnabled.value = 1
+                    onStopRequested: studioBroadcastEnabled.value = 0
+
+                    Mixxx.ControlProxy {
+                        id: studioBroadcastEnabled
+
+                        group: "[Shoutcast]"
+                        key: "enabled"
+                    }
+                }
+                Skin.StudioHoldButton {
+                    id: recordButton
+
+                    Layout.alignment: Qt.AlignVCenter
+                    active: studioRecordingStatus.value === 2
+                    text: "● REC"
+
+                    onStartRequested: studioRecordingToggle.trigger()
+                    onStopRequested: studioRecordingToggle.trigger()
+
+                    Mixxx.ControlProxy {
+                        id: studioRecordingStatus
+
+                        group: "[Recording]"
+                        key: "status"
+                    }
+                    Mixxx.ControlProxy {
+                        id: studioRecordingToggle
+
+                        group: "[Recording]"
+                        key: "toggle_recording"
+                    }
+                }
+                Item {
+                    Layout.preferredWidth: 16
+                }
+                // [AI-generated, end]
                 Skin.Button {
                     id: show4DecksButton
 
@@ -175,6 +248,7 @@ Item {
                     activeColor: Theme.white
                     checkable: true
                     text: "Edit"
+                    visible: root.width > 960 // THE VAN STUDIO [AI-generated]: room for MIC on phones
                 }
                 Skin.Button {
                     id: showDevToolsButton
@@ -183,6 +257,7 @@ Item {
                     checkable: true
                     checked: devToolsWindow.visible
                     text: "Develop"
+                    visible: root.width > 1100 // THE VAN STUDIO [AI-generated]: room for MIC on phones
 
                     onClicked: {
                         if (devToolsWindow.visible)
@@ -217,6 +292,43 @@ Item {
                         Mixxx.PreferencesDialog.show();
                     }
                 }
+                // THE VAN STUDIO [AI-generated, start]: microphone on/off
+                // (talkover of the first microphone input), far from ON AIR.
+                Rectangle {
+                    id: micButton
+
+                    readonly property bool micOn: studioMicTalkover.value > 0
+
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 24
+                    border.color: Theme.yellow
+                    border.width: 2
+                    color: micOn ? Theme.yellow : Theme.surface2Color
+                    implicitHeight: 44
+                    implicitWidth: 120
+                    radius: 14
+
+                    Text {
+                        anchors.centerIn: parent
+                        color: micButton.micOn ? Theme.onAccentTextColor : Theme.textColor
+                        font.bold: true
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 16
+                        text: micButton.micOn ? "MIC ON" : "MIC"
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+
+                        onClicked: studioMicTalkover.value = micButton.micOn ? 0 : 1
+                    }
+                    Mixxx.ControlProxy {
+                        id: studioMicTalkover
+
+                        group: "[Microphone]"
+                        key: "talkover"
+                    }
+                }
+                // [AI-generated, end]
             }
         }
         SplitView {

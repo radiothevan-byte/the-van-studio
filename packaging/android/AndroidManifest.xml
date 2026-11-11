@@ -30,7 +30,7 @@
         android:name="org.mixxx.StudioApplication"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Mixxx"
+        android:label="THE VAN STUDIO"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
