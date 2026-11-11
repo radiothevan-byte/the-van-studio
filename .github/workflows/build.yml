@@ -477,7 +477,10 @@ jobs:
       - name: "[android] Check native libraries against Android 13 (API 33)"
         if: startsWith(matrix.artifacts_slug, 'android')
         continue-on-error: true
-        run: python3 tools/check_android_api_level.py build/android-build/libs/arm64-v8a "${ANDROID_NDK_HOME}" 33
+        run: |
+          python3 tools/check_android_api_level.py build/android-build/libs/arm64-v8a "${ANDROID_NDK_HOME}" 33
+          "${ANDROID_NDK_HOME}"/toolchains/llvm/prebuilt/*/bin/llvm-readelf -d build/android-build/libs/arm64-v8a/libvanstudio_compat.so | grep -E "FLAGS_1|SONAME"
+          "${ANDROID_NDK_HOME}"/toolchains/llvm/prebuilt/*/bin/llvm-readelf -d build/android-build/libs/arm64-v8a/libQt6Core_arm64-v8a.so | grep NEEDED
 
       - name: "[Ubuntu/macOS] Print compiler cache stats"
         if: runner.os != 'windows'

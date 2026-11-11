@@ -89,7 +89,6 @@ case "$1" in
             libxrender-dev \
             linux-libc-dev \
             openjdk-17-jdk \
-            patchelf \
             pkg-config \
             python3-jinja2
         (yes | sudo sdkmanager --licenses) || true

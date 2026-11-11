@@ -33,6 +33,15 @@ public class StudioApplication extends QtApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        // THE VAN STUDIO [AI-generated]: load the Android 13 compatibility shim
+        // before Qt loads its libraries. It is linked with DF_1_GLOBAL, so the
+        // symbols it provides (e.g. copy_file_range, API 34+) are found by
+        // libQt6Core and the other prebuilt libraries on Android 13.
+        try {
+            System.loadLibrary("vanstudio_compat");
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not load the compatibility library", t);
+        }
         final Thread.UncaughtExceptionHandler previous =
                 Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, error) -> {
