@@ -195,6 +195,7 @@ Item {
                 Skin.Button {
                     id: show4DecksButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "4 Decks"
@@ -203,6 +204,7 @@ Item {
                 Skin.Button {
                     id: maximizeLibraryButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "Library"
@@ -225,6 +227,7 @@ Item {
                 Skin.Button {
                     id: showEffectsButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "Effects"
@@ -232,6 +235,7 @@ Item {
                 Skin.Button {
                     id: showAuxButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "Aux"
@@ -239,6 +243,7 @@ Item {
                 Skin.Button {
                     id: showSamplersButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "Sampler"
@@ -249,6 +254,7 @@ Item {
                 Skin.Button {
                     id: editDeckButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     text: "Edit"
@@ -257,6 +263,7 @@ Item {
                 Skin.Button {
                     id: showDevToolsButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checkable: true
                     checked: devToolsWindow.visible
@@ -280,11 +287,12 @@ Item {
                 Skin.Button {
                     id: showPreferencesButton
 
+                    implicitHeight: 40 // THE VAN STUDIO [AI-generated]: finger-sized
                     activeColor: Theme.white
                     checked: settingsPopup.opened
-                    icon.height: 16
+                    icon.height: 22
                     icon.source: "images/gear.svg"
-                    icon.width: 16
+                    icon.width: 22
                     implicitWidth: implicitHeight
 
                     onClicked: {

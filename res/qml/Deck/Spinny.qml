@@ -47,7 +47,7 @@ Item {
                 Rectangle {
                     id: tick
 
-                    color: '#0E0E0E'
+                    color: Theme.surfaceColor
                     height: 70
                     width: 2
 
@@ -64,7 +64,7 @@ Item {
 
         anchors.centerIn: spinner
         clip: true
-        color: '#0E0E0E'
+        color: Theme.surfaceColor
         height: trackLoadedControl.value ? spinner.height / 4 : 0
         radius: height / 2 - 5
         width: spinner.width / 2 - 10

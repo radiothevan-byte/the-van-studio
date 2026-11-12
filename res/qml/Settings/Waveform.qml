@@ -624,9 +624,9 @@ Category {
         height: 20
 
         Setting.FormButton {
-            activeColor: "#999999"
+            activeColor: Theme.textDimColor
             anchors.left: parent.left
-            backgroundColor: "#7D3B3B"
+            backgroundColor: Theme.liveColor
             opacity: enabled ? 1.0 : 0.5
             text: "Reset"
 
@@ -643,12 +643,12 @@ Category {
 
                 Layout.alignment: Qt.AlignVCenter
                 Layout.rightMargin: 16
-                color: "#7D3B3B"
+                color: Theme.liveColor
                 text: ""
             }
             Setting.FormButton {
-                activeColor: "#999999"
-                backgroundColor: "#3F3F3F"
+                activeColor: Theme.textDimColor
+                backgroundColor: Theme.surface2Color
                 opacity: enabled ? 1.0 : 0.5
                 text: "Cancel"
                 visible: root.dirty
@@ -658,8 +658,8 @@ Category {
                 }
             }
             Setting.FormButton {
-                activeColor: "#999999"
-                backgroundColor: root.dirty ? "#3a60be" : "#3F3F3F"
+                activeColor: Theme.textDimColor
+                backgroundColor: root.dirty ? Theme.accentColor : Theme.surface2Color
                 enabled: root.dirty
                 opacity: enabled ? 1.0 : 0.5
                 text: "Save"

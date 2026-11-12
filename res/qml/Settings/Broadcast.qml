@@ -566,7 +566,7 @@ Category {
         SettingComponents.FormButton {
             Layout.preferredHeight: 44
             Layout.preferredWidth: 140
-            backgroundColor: broadcastEnabled.value > 0 ? "#7D3B3B" : "#3B5A7D"
+            backgroundColor: broadcastEnabled.value > 0 ? Theme.liveColor : Theme.accentDimColor
             enabled: Mixxx.StudioSettings.broadcastAvailable
             text: broadcastEnabled.value > 0 ? "Stop broadcast" : "Go live"
 

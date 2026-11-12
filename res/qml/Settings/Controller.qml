@@ -163,7 +163,7 @@ Category {
                             text: modelData.name
                         }
                         Skin.FormButton {
-                            activeColor: "#999999"
+                            activeColor: Theme.textDimColor
                             text: "Create device"
                             visible: unknownDeviceRow.containsMouse || hovered || unknownDevicesList.currentIndex == index
 
@@ -209,8 +209,8 @@ Category {
         visible: root.dirty || root.selectedController
 
         Skin.FormButton {
-            activeColor: "#999999"
-            backgroundColor: "#7D3B3B"
+            activeColor: Theme.textDimColor
+            backgroundColor: Theme.liveColor
             opacity: enabled ? 1.0 : 0.5
             text: "Reset"
             visible: !!root.selectedController?.mapping?.hasSettings
@@ -228,12 +228,12 @@ Category {
 
             Layout.alignment: Qt.AlignVCenter
             Layout.rightMargin: 16
-            color: "#7D3B3B"
+            color: Theme.liveColor
             text: ""
         }
         Skin.FormButton {
-            activeColor: "#999999"
-            backgroundColor: "#3F3F3F"
+            activeColor: Theme.textDimColor
+            backgroundColor: Theme.surface2Color
             opacity: enabled ? 1.0 : 0.5
             text: "Cancel"
 
@@ -243,8 +243,8 @@ Category {
             }
         }
         Skin.FormButton {
-            activeColor: "#999999"
-            backgroundColor: root.dirty ? "#3a60be" : "#3F3F3F"
+            activeColor: Theme.textDimColor
+            backgroundColor: root.dirty ? Theme.accentColor : Theme.surface2Color
             opacity: enabled ? 1.0 : 0.5
             text: "Save"
 

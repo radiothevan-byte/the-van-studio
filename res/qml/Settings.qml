@@ -12,6 +12,14 @@ Popup {
     id: root
 
     property var activeCategory: null
+    // THE VAN STUDIO [AI-generated, start]: phone layout. On narrow screens
+    // the category list and the selected page take the full width in turn,
+    // with a back button, like a phone settings app.
+    readonly property bool compact: width < 1000
+    property bool pageOpen: false
+    readonly property bool showList: !compact || !pageOpen
+    readonly property bool showPage: !compact || pageOpen
+    // [AI-generated, end]
     property alias activeCategoryIndex: categoryList.currentIndex
     readonly property var manager: managerItem
     property alias sections: managerItem.data
@@ -22,35 +30,104 @@ Popup {
         root.activeCategory?.activated();
     }
 
-    horizontalPadding: 20
-    verticalPadding: 20
+    horizontalPadding: compact ? 8 : 20
+    verticalPadding: compact ? 8 : 20
+
+    onOpened: root.pageOpen = false
 
     background: Rectangle {
         anchors.fill: parent
-        color: Theme.darkGray2
+        border.color: Theme.borderColor
+        border.width: 1
+        color: Theme.backgroundColor
         opacity: parent.radius < 0 ? Math.max(0.1, 1 + parent.radius / 8) : 1
-        radius: 8
+        radius: root.compact ? 0 : 18
     }
     contentItem: Item {
         anchors.centerIn: parent
-        height: parent.height - 40
-        width: parent.width - 40
+        height: parent.height - 2 * root.verticalPadding
+        width: parent.width - 2 * root.horizontalPadding
+
+        // THE VAN STUDIO [AI-generated, start]: header with back and close
+        RowLayout {
+            id: settingsHeader
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 48
+            spacing: 8
+
+            Rectangle {
+                Layout.preferredHeight: 44
+                Layout.preferredWidth: backLabel.implicitWidth + 28
+                border.color: Theme.borderColor
+                color: Theme.surface2Color
+                radius: 22
+                visible: root.compact && root.pageOpen
+
+                Text {
+                    id: backLabel
+
+                    anchors.centerIn: parent
+                    color: Theme.textColor
+                    font.bold: true
+                    font.pixelSize: 15
+                    text: "‹ " + qsTr("Back")
+                }
+                TapHandler {
+                    onTapped: root.pageOpen = false
+                }
+            }
+            Text {
+                Layout.fillWidth: true
+                color: Theme.textColor
+                elide: Text.ElideRight
+                font.bold: true
+                font.family: Theme.fontFamily
+                font.pixelSize: 20
+                text: root.compact && root.pageOpen && root.activeCategory ? root.activeCategory.label : qsTr("Settings")
+            }
+            Rectangle {
+                Layout.preferredHeight: 44
+                Layout.preferredWidth: 44
+                border.color: Theme.borderColor
+                color: Theme.surface2Color
+                radius: 22
+
+                Text {
+                    anchors.centerIn: parent
+                    color: Theme.textColor
+                    font.pixelSize: 20
+                    text: "✕"
+                }
+                TapHandler {
+                    onTapped: root.close()
+                }
+            }
+        }
+        // [AI-generated, end]
 
         RowLayout {
-            anchors.fill: parent
-            spacing: 0
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: settingsHeader.bottom
+            anchors.topMargin: 8
+            spacing: root.compact ? 0 : 16
 
             Rectangle {
                 Layout.fillHeight: true
-                Layout.preferredWidth: 280
-                border.color: Theme.darkGray3
-                border.width: 6
-                color: Theme.darkGray
+                Layout.fillWidth: root.compact
+                Layout.preferredWidth: root.compact ? -1 : 280
+                color: Theme.surfaceColor
+                radius: 14
+                visible: root.showList
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 6
-                    spacing: 0
+                    anchors.margins: 8
+                    spacing: 6
 
                     Rectangle {
                         id: searchSetting
@@ -59,23 +136,33 @@ Popup {
                         property alias input: searchInput
 
                         Layout.fillWidth: true
-                        color: Theme.midGray
-                        height: 30
+                        border.color: Theme.borderColor
+                        color: Theme.surface2Color
+                        height: 44
+                        radius: 22
 
                         Text {
                             id: searchInputPlaceholder
 
+                            anchors.left: parent.left
+                            anchors.leftMargin: 16
                             anchors.verticalCenter: parent.verticalCenter
-                            color: Theme.white
-                            text: 'Search...'
+                            color: Theme.textDimColor
+                            font.pixelSize: 15
+                            text: qsTr('Search...')
                             visible: !parent.active
                         }
                         TextInput {
                             id: searchInput
 
+                            anchors.left: parent.left
+                            anchors.leftMargin: 16
+                            anchors.right: parent.right
+                            anchors.rightMargin: 16
                             anchors.verticalCenter: parent.verticalCenter
+                            color: Theme.textColor
+                            font.pixelSize: 15
                             visible: parent.active
-                            width: parent.width
 
                             onActiveFocusChanged: {
                                 parent.active = activeFocus;
@@ -106,38 +193,69 @@ Popup {
                             required property int index
                             required property var label
 
-                            color: ListView.isCurrentItem ? Theme.darkGray3 : Theme.darkGray2
-                            height: 38
+                            color: ListView.isCurrentItem && !root.compact ? Theme.surface2Color : "transparent"
+                            height: root.compact ? 54 : 46
+                            radius: 10
                             width: ListView.view.width
+
+                            Rectangle {
+                                // THE VAN STUDIO [AI-generated]: accent marker on the selected category
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: Theme.accentColor
+                                height: parent.height - 16
+                                radius: 2
+                                visible: parent.ListView.isCurrentItem && !root.compact
+                                width: 4
+                            }
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                color: Theme.borderColor
+                                height: 1
+                                visible: root.compact
+                            }
+                            Text {
+                                anchors.right: parent.right
+                                anchors.rightMargin: 12
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: Theme.textDimColor
+                                font.pixelSize: 22
+                                text: "›"
+                                visible: root.compact
+                            }
 
                             Image {
                                 id: handleImage
 
                                 anchors.left: parent.left
-                                anchors.leftMargin: 8
+                                anchors.leftMargin: 14
                                 anchors.verticalCenter: parent.verticalCenter
                                 fillMode: Image.PreserveAspectFit
-                                height: 24
+                                height: 22
                                 source: "images/gear.svg"
                                 visible: false
                             }
                             ColorOverlay {
                                 anchors.fill: handleImage
                                 antialiasing: true
-                                color: parent.ListView.isCurrentItem ? Theme.accentColor : Theme.midGray
+                                color: parent.ListView.isCurrentItem ? Theme.accentColor : Theme.textDimColor
                                 source: handleImage
                             }
                             Text {
                                 anchors.left: handleImage.right
-                                anchors.leftMargin: 8
+                                anchors.leftMargin: 12
                                 anchors.verticalCenter: parent.verticalCenter
-                                color: Theme.white
+                                color: Theme.textColor
                                 font.bold: parent.ListView.isCurrentItem
+                                font.pixelSize: root.compact ? 17 : 15
                                 text: label
                             }
                             TapHandler {
                                 onTapped: {
                                     categoryList.currentIndex = index;
+                                    root.pageOpen = true;
                                 }
                             }
                         }
@@ -158,8 +276,8 @@ Popup {
                             required property var toolTip
                             required property var whatsThis
 
-                            color: Theme.darkGray2
-                            height: 40
+                            color: "transparent"
+                            height: 52
                             width: ListView.view.width
 
                             ColumnLayout {
@@ -176,8 +294,8 @@ Popup {
                                 Text {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: implicitHeight
-                                    color: Theme.midGray
-                                    font.pixelSize: 10
+                                    color: Theme.textDimColor
+                                    font.pixelSize: 11
                                     text: searchSetting.input.text ? whatsThis.replace(searchSetting.input.text, `<b>${searchSetting.input.text}</b>`) : whatsThis
                                     textFormat: Text.RichText
                                 }
@@ -187,6 +305,7 @@ Popup {
                                     for (let setting of toolTip) {
                                         setting.activated();
                                     }
+                                    root.pageOpen = true;
                                     parent.forceActiveFocus();
                                 }
                             }
@@ -197,15 +316,8 @@ Popup {
             ColumnLayout {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+                visible: root.showPage
 
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredHeight: 36
-                    color: Theme.white
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
-                    text: "Settings"
-                }
                 Rectangle {
                     id: tabBar
 
@@ -213,8 +325,9 @@ Popup {
                     readonly property var tabs: root.activeCategory?.tabs ?? []
 
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 30
-                    color: Theme.darkGray3
+                    Layout.preferredHeight: 48
+                    color: Theme.surfaceColor
+                    radius: 12
                     visible: tabs?.length > 0
 
                     RowLayout {
@@ -228,8 +341,8 @@ Popup {
                                 required property string modelData
 
                                 Layout.alignment: Qt.AlignHCenter
-                                Layout.preferredHeight: 22
-                                Layout.preferredWidth: parent.width / (tabBar.tabs.length + 2)
+                                Layout.preferredHeight: 38
+                                Layout.preferredWidth: parent.width / (tabBar.tabs.length + (root.compact ? 0.5 : 2))
                                 activeColor: Theme.white
                                 checked: tabBar.selectedIndex == index
                                 text: modelData
@@ -248,7 +361,7 @@ Popup {
 
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    Layout.leftMargin: 20
+                    Layout.leftMargin: root.compact ? 0 : 8
 
                     Component.onCompleted: {
                         let activateBuilder = index => function () {

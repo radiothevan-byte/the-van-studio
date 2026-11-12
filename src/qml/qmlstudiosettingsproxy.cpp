@@ -17,6 +17,9 @@
 #include "encoder/encoder.h"
 #include "encoder/encoderrecordingsettings.h"
 #include "moc_qmlstudiosettingsproxy.cpp"
+#include "preferences/beatdetectionsettings.h"
+#include "preferences/keydetectionsettings.h"
+#include "preferences/replaygainsettings.h"
 #include "recording/defs_recording.h"
 #ifdef __BROADCAST__
 #include "broadcast/defs_broadcast.h"
@@ -359,6 +362,53 @@ QString QmlStudioSettingsProxy::saveBroadcastSettings(const QVariantMap& setting
     Q_UNUSED(settings);
     return QStringLiteral("Live broadcasting is not available in this build");
 #endif
+}
+
+QVariantMap QmlStudioSettingsProxy::analyzerSettings() const {
+    QVariantMap result;
+    if (!s_pConfig) {
+        return result;
+    }
+    const BeatDetectionSettings beat(s_pConfig);
+    const KeyDetectionSettings key(s_pConfig);
+    const ReplayGainSettings replayGain(s_pConfig);
+    result["bpmEnabled"] = beat.getBpmDetectionEnabled();
+    result["bpmFixedTempo"] = beat.getFixedTempoAssumption();
+    result["bpmFast"] = beat.getFastAnalysis();
+    result["keyEnabled"] = key.getKeyDetectionEnabled();
+    result["keyFast"] = key.getFastAnalysis();
+    result["replayGainEnabled"] = replayGain.getReplayGainAnalyzerEnabled();
+    return result;
+}
+
+QString QmlStudioSettingsProxy::saveAnalyzerSettings(const QVariantMap& settings) {
+    if (!s_pConfig) {
+        return tr("Settings are not available yet.");
+    }
+    BeatDetectionSettings beat(s_pConfig);
+    KeyDetectionSettings key(s_pConfig);
+    ReplayGainSettings replayGain(s_pConfig);
+    if (settings.contains("bpmEnabled")) {
+        beat.setBpmDetectionEnabled(settings.value("bpmEnabled").toBool());
+    }
+    if (settings.contains("bpmFixedTempo")) {
+        beat.setFixedTempoAssumption(settings.value("bpmFixedTempo").toBool());
+    }
+    if (settings.contains("bpmFast")) {
+        beat.setFastAnalysis(settings.value("bpmFast").toBool());
+    }
+    if (settings.contains("keyEnabled")) {
+        key.setKeyDetectionEnabled(settings.value("keyEnabled").toBool());
+    }
+    if (settings.contains("keyFast")) {
+        key.setFastAnalysis(settings.value("keyFast").toBool());
+    }
+    if (settings.contains("replayGainEnabled")) {
+        replayGain.setReplayGainAnalyzerEnabled(
+                settings.value("replayGainEnabled").toBool());
+    }
+    s_pConfig->save();
+    return QString();
 }
 
 QVariantMap QmlStudioSettingsProxy::safeAreaInsets() const {

@@ -11,7 +11,7 @@ FocusScope {
     Rectangle {
         id: backgroundInput
         radius: 4
-        color: '#232323'
+        color: Theme.surface2Color
         anchors.fill: parent
     }
     DropShadow {
@@ -32,7 +32,7 @@ FocusScope {
         samples: 24
         horizontalOffset: 0
         verticalOffset: 0
-        color: "#353535"
+        color: Theme.surface2Color
     }
     TextInput {
         id: inputField
@@ -42,7 +42,7 @@ FocusScope {
         anchors.margins: 7
         focus: true
         clip: true
-        color: acceptableInput ? "#FFFFFF" : "#7D3B3B"
+        color: acceptableInput ? "#FFFFFF" : Theme.liveColor
         horizontalAlignment: TextInput.AlignLeft
     }
 }

@@ -26,7 +26,7 @@ Item {
         key: "track_loaded"
     }
     Rectangle {
-        color: '#0E0E0E'
+        color: Theme.surfaceColor
 
         states: [
             State {
@@ -134,7 +134,7 @@ Item {
                             id: backgroundImage
 
                             anchors.fill: parent
-                            color: hotcue.isSet ? hotcue.color : '#2B2B2B'
+                            color: hotcue.isSet ? hotcue.color : Theme.surface2Color
 
                             MouseArea {
                                 id: activator
@@ -157,7 +157,7 @@ Item {
                             id: effect2
 
                             anchors.fill: parent
-                            color: "#353535"
+                            color: Theme.surface2Color
                             horizontalOffset: 1
                             radius: 12
                             samples: 24
@@ -167,7 +167,7 @@ Item {
                         }
                         InnerShadow {
                             anchors.fill: parent
-                            color: "#353535"
+                            color: Theme.surface2Color
                             horizontalOffset: -1
                             radius: 12
                             samples: 24
@@ -181,14 +181,14 @@ Item {
 
                             Label {
                                 Layout.alignment: Qt.AlignHCenter
-                                color: "#626262"
+                                color: Theme.borderColor
                                 font.pixelSize: 14
                                 font.weight: Font.Bold
                                 text: `${index + 1}`
                             }
                             Label {
                                 Layout.alignment: Qt.AlignHCenter
-                                color: "#626262"
+                                color: Theme.borderColor
                                 font.pixelSize: 12
                                 text: hotcue.label ?? ""
                                 visible: hotcue.label
@@ -295,7 +295,7 @@ Item {
                                 id: effect2
 
                                 anchors.fill: parent
-                                color: "#353535"
+                                color: Theme.surface2Color
                                 horizontalOffset: 2
                                 radius: 4.0
                                 samples: 24
@@ -306,7 +306,7 @@ Item {
                             }
                             InnerShadow {
                                 anchors.fill: parent
-                                color: "#353535"
+                                color: Theme.surface2Color
                                 horizontalOffset: -2
                                 radius: 4.0
                                 samples: 24

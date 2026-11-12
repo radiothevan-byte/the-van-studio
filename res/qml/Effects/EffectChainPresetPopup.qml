@@ -4,19 +4,20 @@ import "." as Skin
 import Mixxx 1.0 as Mixxx
 import QtQuick
 import QtQuick.Controls
+import "../Theme"
 
 Menu {
     id: root
 
-    property color backgroundColor: "#151517"
-    property color borderColor: "#333333"
+    property color backgroundColor: Theme.surfaceColor
+    property color borderColor: Theme.surface2Color
     property url checkedSource
-    property color disabledTextColor: "#494949"
+    property color disabledTextColor: Theme.borderColor
     property string fontFamily: "Open Sans"
     property int fontPixelSize: 14
     property color hoverColor: "#2c454f"
     property color hoverTextColor: "#ffffff"
-    property color separatorBottomColor: "#333333"
+    property color separatorBottomColor: Theme.surface2Color
     property color separatorTopColor: "#000000"
     required property Mixxx.EffectSlotProxy slot1
     required property Mixxx.EffectSlotProxy slot2

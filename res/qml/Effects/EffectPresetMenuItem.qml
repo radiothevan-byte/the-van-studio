@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Controls
+import "../Theme"
 
 MenuItem {
     id: root
 
     property url checkedSource
-    property color disabledTextColor: "#494949"
+    property color disabledTextColor: Theme.borderColor
     property string fontFamily: "Open Sans"
     property int fontPixelSize: 14
     property color hoverColor: "#2c454f"

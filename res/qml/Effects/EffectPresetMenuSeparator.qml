@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Controls
+import "../Theme"
 
 MenuSeparator {
     id: root
 
-    property color bottomColor: "#333333"
+    property color bottomColor: Theme.surface2Color
     property color topColor: "#000000"
 
     implicitHeight: 6

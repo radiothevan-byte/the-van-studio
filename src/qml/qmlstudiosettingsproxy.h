@@ -58,6 +58,13 @@ class QmlStudioSettingsProxy : public QObject {
     Q_INVOKABLE QString saveRecordingSettings(const QVariantMap& settings);
     Q_INVOKABLE QString defaultRecordingDirectory() const;
 
+    // ---- Analyzer ----
+    /// Keys: bpmEnabled, bpmFixedTempo, bpmFast, keyEnabled, keyFast,
+    /// replayGainEnabled
+    Q_INVOKABLE QVariantMap analyzerSettings() const;
+    /// Same keys as analyzerSettings(). Returns an empty string on success.
+    Q_INVOKABLE QString saveAnalyzerSettings(const QVariantMap& settings);
+
     // ---- Android screen and storage ----
     /// Screen area to keep free (camera cutout), in device independent
     /// pixels: {left, top, right, bottom}. All zero on other platforms.

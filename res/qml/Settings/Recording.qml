@@ -51,12 +51,12 @@ Category {
             settings.qualityIndex = qualityInput.currentIndex;
         const error = Mixxx.StudioSettings.saveRecordingSettings(settings);
         if (error) {
-            message.color = "#D96B6B";
+            message.color = "#ff6b6b";
             message.text = error;
             return;
         }
         root.load();
-        message.color = "#7DBF7D";
+        message.color = Theme.accentColor;
         message.text = "Saved";
     }
 
@@ -67,7 +67,7 @@ Category {
     component FieldLabel: Mixxx.SettingParameter {
         Layout.alignment: Qt.AlignVCenter
         Layout.preferredHeight: 44
-        Layout.preferredWidth: 220
+        Layout.preferredWidth: root.width < 700 ? 150 : 220
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -160,6 +160,7 @@ Category {
                     id: formatInput
 
                     Layout.preferredHeight: 44
+                    Layout.fillWidth: root.width < 700
                     Layout.preferredWidth: 280
                     font.pixelSize: 16
 
@@ -181,6 +182,7 @@ Category {
                     id: qualityInput
 
                     Layout.preferredHeight: 44
+                    Layout.fillWidth: root.width < 700
                     Layout.preferredWidth: 280
                     font.pixelSize: 16
 
@@ -197,6 +199,7 @@ Category {
                     id: splitInput
 
                     Layout.preferredHeight: 44
+                    Layout.fillWidth: root.width < 700
                     Layout.preferredWidth: 280
                     font.pixelSize: 16
 
@@ -243,7 +246,7 @@ Category {
         SettingComponents.FormButton {
             Layout.preferredHeight: 44
             Layout.preferredWidth: 120
-            backgroundColor: "#3B7D4A"
+            backgroundColor: Theme.accentColor
             enabled: root.dirty
             opacity: enabled ? 1.0 : 0.5
             text: "Save"

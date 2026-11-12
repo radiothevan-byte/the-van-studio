@@ -25,7 +25,7 @@ ComboBox {
             anchors.margins: 4
             border.color: '#000000'
             border.width: 1
-            color: '#232323'
+            color: Theme.surface2Color
             radius: 4
         }
         InnerShadow {

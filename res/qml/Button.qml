@@ -14,47 +14,18 @@ AbstractButton {
     implicitHeight: 26
     implicitWidth: 52
 
-    background: Item {
+    // THE VAN STUDIO [AI-generated, start]: flat rounded buttons in the
+    // THE VAN RADIO style (dark surface, thin border, cyan when active).
+    background: Rectangle {
+        id: backgroundImage
+
         anchors.fill: parent
-
-        Rectangle {
-            id: backgroundImage
-
-            anchors.fill: parent
-            color: '#2B2B2B'
-            radius: 2
-        }
-        DropShadow {
-            id: effect1
-
-            anchors.fill: backgroundImage
-            color: "#80000000"
-            horizontalOffset: 0
-            radius: 1.0
-            source: backgroundImage
-            verticalOffset: 0
-        }
-        InnerShadow {
-            id: effect2
-
-            anchors.fill: backgroundImage
-            color: "#353535"
-            horizontalOffset: 1
-            radius: 1
-            samples: 16
-            source: effect1
-            verticalOffset: 1
-        }
-        InnerShadow {
-            anchors.fill: backgroundImage
-            color: "#353535"
-            horizontalOffset: -1
-            radius: 1
-            samples: 16
-            source: effect2
-            verticalOffset: -1
-        }
+        border.color: Theme.borderColor
+        border.width: 1
+        color: Theme.surface2Color
+        radius: Math.min(8, height / 2)
     }
+    // [AI-generated, end]
     contentItem: Item {
         anchors.fill: parent
 
@@ -106,7 +77,7 @@ AbstractButton {
             when: root.pressed
 
             PropertyChanges {
-                color: root.checked ? "#3a60be" : Theme.darkGray3
+                color: Theme.accentDimColor
                 target: backgroundImage
             }
             PropertyChanges {
@@ -123,11 +94,11 @@ AbstractButton {
             when: (root.highlight || root.checked) && !root.pressed
 
             PropertyChanges {
-                color: "#2D4EA1"
+                color: Theme.accentColor
                 target: backgroundImage
             }
             PropertyChanges {
-                color: root.activeColor
+                color: Theme.onAccentTextColor
                 target: label
             }
             PropertyChanges {

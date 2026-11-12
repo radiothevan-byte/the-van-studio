@@ -107,7 +107,7 @@ Item {
             gainLow: Mixxx.Config.waveformVisualGainLow
             gainMid: Mixxx.Config.waveformVisualGainMedium
             highColor: '#D5C2A2'
-            lowColor: '#2154D7'
+            lowColor: Theme.accentColor
             midColor: '#97632D'
         }
         Mixxx.WaveformRendererFiltered {
@@ -118,7 +118,7 @@ Item {
             gainLow: Mixxx.Config.waveformVisualGainLow
             gainMid: Mixxx.Config.waveformVisualGainMedium
             highColor: '#D5C2A2'
-            lowColor: '#2154D7'
+            lowColor: Theme.accentColor
             midColor: '#97632D'
             stacked: true
         }
@@ -145,7 +145,7 @@ Item {
             gainLow: Mixxx.Config.waveformVisualGainLow
             gainMid: Mixxx.Config.waveformVisualGainMedium
             highColor: '#D5C2A2'
-            lowColor: '#2154D7'
+            lowColor: Theme.accentColor
             midColor: '#97632D'
         }
         Mixxx.WaveformRendererStem {

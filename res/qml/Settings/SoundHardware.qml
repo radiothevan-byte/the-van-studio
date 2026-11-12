@@ -636,8 +636,8 @@ Category {
                 Layout.topMargin: 4
 
                 Skin.FormButton {
-                    activeColor: "#999999"
-                    backgroundColor: "#7D3B3B"
+                    activeColor: Theme.textDimColor
+                    backgroundColor: Theme.liveColor
                     enabled: !root.committing
                     opacity: enabled ? 1.0 : 0.5
                     text: "Cancel"
@@ -655,12 +655,12 @@ Category {
 
                     Layout.alignment: Qt.AlignVCenter
                     Layout.rightMargin: 16
-                    color: "#7D3B3B"
+                    color: Theme.liveColor
                     text: ""
                 }
                 Skin.FormButton {
-                    activeColor: "#999999"
-                    backgroundColor: root.hasChanges ? "#3a60be" : Theme.darkGray3
+                    activeColor: Theme.textDimColor
+                    backgroundColor: root.hasChanges ? Theme.accentColor : Theme.darkGray3
                     enabled: root.hasChanges && !root.committing
                     opacity: enabled ? 1.0 : 0.5
                     text: "Save"

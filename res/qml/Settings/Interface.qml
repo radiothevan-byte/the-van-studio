@@ -536,7 +536,7 @@ Category {
                                                 id: bottomInnerEffect
 
                                                 anchors.fill: parent
-                                                color: "#0E2A54"
+                                                color: Theme.accentDeepColor
                                                 horizontalOffset: -1
                                                 radius: 8
                                                 samples: 32
@@ -548,7 +548,7 @@ Category {
                                                 id: topInnerEffect
 
                                                 anchors.fill: parent
-                                                color: "#0E2A54"
+                                                color: Theme.accentDeepColor
                                                 horizontalOffset: 1
                                                 radius: 8
                                                 samples: 32
@@ -1530,9 +1530,9 @@ Category {
         height: 20
 
         SettingComponents.FormButton {
-            activeColor: "#999999"
+            activeColor: Theme.textDimColor
             anchors.left: parent.left
-            backgroundColor: "#7D3B3B"
+            backgroundColor: Theme.liveColor
             opacity: enabled ? 1.0 : 0.5
             text: "Reset"
 
@@ -1556,12 +1556,12 @@ Category {
 
                 Layout.alignment: Qt.AlignVCenter
                 Layout.rightMargin: 16
-                color: "#7D3B3B"
+                color: Theme.liveColor
                 text: ""
             }
             SettingComponents.FormButton {
-                activeColor: "#999999"
-                backgroundColor: "#3F3F3F"
+                activeColor: Theme.textDimColor
+                backgroundColor: Theme.surface2Color
                 enabled: root.selectedIndex == 0 && themeColorTab.dirty || root.selectedIndex == 1 && decksTab.dirty
                 opacity: enabled ? 1.0 : 0.5
                 text: "Cancel"
@@ -1578,8 +1578,8 @@ Category {
                 }
             }
             SettingComponents.FormButton {
-                activeColor: "#999999"
-                backgroundColor: (root.selectedIndex == 0 && themeColorTab.dirty || root.selectedIndex == 1 && decksTab.dirty) ? "#3a60be" : "#3F3F3F"
+                activeColor: Theme.textDimColor
+                backgroundColor: (root.selectedIndex == 0 && themeColorTab.dirty || root.selectedIndex == 1 && decksTab.dirty) ? Theme.accentColor : Theme.surface2Color
                 enabled: root.selectedIndex == 0 && themeColorTab.dirty || root.selectedIndex == 1 && decksTab.dirty
                 opacity: enabled ? 1.0 : 0.5
                 text: "Save"

@@ -232,7 +232,7 @@ Category {
                         // anchors.left: parent.left
                         // anchors.right: parent.right
                         Layout.minimumWidth: sourcePane.implicitWidth
-                        color: '#0E0E0E'
+                        color: Theme.surfaceColor
                         implicitHeight: sourcePane.implicitHeight + 20
 
                         ColumnLayout {
@@ -277,8 +277,8 @@ Category {
                                     }
                                 }
                                 SettingComponents.FormButton {
-                                    activeColor: "#999999"
-                                    backgroundColor: "#3F3F3F"
+                                    activeColor: Theme.textDimColor
+                                    backgroundColor: Theme.surface2Color
                                     opacity: enabled ? 1.0 : 0.5
                                     text: qsTr("Add")
 
@@ -286,7 +286,7 @@ Category {
                                 }
                                 // THE VAN STUDIO [AI-generated, start]
                                 SettingComponents.FormButton {
-                                    activeColor: "#999999"
+                                    activeColor: Theme.textDimColor
                                     backgroundColor: Theme.surface2Color
                                     enabled: !Mixxx.Library.scanner.running
                                     opacity: enabled ? 1.0 : 0.5
@@ -326,7 +326,7 @@ Category {
                                         wrapMode: Text.WordWrap
                                     }
                                     SettingComponents.FormButton {
-                                        activeColor: "#999999"
+                                        activeColor: Theme.textDimColor
                                         backgroundColor: Theme.accentColor
                                         text: qsTr("Allow")
 
@@ -419,8 +419,8 @@ Category {
                                             SettingComponents.FormButton {
                                                 id: relinkButton
 
-                                                activeColor: "#999999"
-                                                backgroundColor: "#3F3F3F"
+                                                activeColor: Theme.textDimColor
+                                                backgroundColor: Theme.surface2Color
                                                 opacity: enabled ? 1.0 : 0.5
                                                 text: modelData.relink ? qsTr("Save to proceed") : qsTr("Relink")
                                                 visible: selected && modelData.trackCount !== undefined && !Mixxx.Library.scanner.running
@@ -447,9 +447,9 @@ Category {
                                                 SettingComponents.FormButton {
                                                     id: actionButton
 
-                                                    activeColor: "#999999"
+                                                    activeColor: Theme.textDimColor
                                                     anchors.centerIn: parent
-                                                    backgroundColor: "#7D3B3B"
+                                                    backgroundColor: Theme.liveColor
                                                     opacity: enabled ? 1.0 : 0.5
                                                     text: qsTr("Remove")
                                                     visible: !removeButton.confirming
@@ -497,7 +497,7 @@ Category {
                                                 }
                                             }
                                             Text {
-                                                color: '#626262'
+                                                color: Theme.borderColor
                                                 font.italic: modelData.trackCount === undefined || modelData.totalMinute === undefined || !!modelData.relink
                                                 font.pixelSize: 14
                                                 font.weight: Font.Medium
@@ -553,8 +553,8 @@ Category {
                                 }
                             }
                             SettingComponents.FormButton {
-                                activeColor: "#999999"
-                                backgroundColor: Mixxx.Library.scanner.cancelling ? "#999999" : "#3a60be"
+                                activeColor: Theme.textDimColor
+                                backgroundColor: Mixxx.Library.scanner.cancelling ? Theme.textDimColor : Theme.accentColor
                                 enabled: !Mixxx.Library.scanner.cancelling
                                 text: qsTr("Cancel")
 
@@ -1069,9 +1069,9 @@ Category {
         height: 20
 
         SettingComponents.FormButton {
-            activeColor: "#999999"
+            activeColor: Theme.textDimColor
             anchors.left: parent.left
-            backgroundColor: "#7D3B3B"
+            backgroundColor: Theme.liveColor
             opacity: enabled ? 1.0 : 0.5
             text: qsTr("Reset")
 
@@ -1084,8 +1084,8 @@ Category {
             spacing: 10
 
             SettingComponents.FormButton {
-                activeColor: "#999999"
-                backgroundColor: "#3F3F3F"
+                activeColor: Theme.textDimColor
+                backgroundColor: Theme.surface2Color
                 opacity: enabled ? 1.0 : 0.5
                 text: qsTr("Cancel")
                 visible: root.dirty
@@ -1095,7 +1095,7 @@ Category {
                 }
             }
             SettingComponents.FormButton {
-                activeColor: "#999999"
+                activeColor: Theme.textDimColor
                 backgroundColor: root.dirty ? Theme.accentColor : Theme.surface2Color
                 enabled: root.dirty
                 opacity: enabled ? 1.0 : 0.5

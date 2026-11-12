@@ -7,7 +7,7 @@ AbstractButton {
     id: root
 
     property color activeColor: Theme.deckActiveColor
-    property color backgroundColor: "#3F3F3F"
+    property color backgroundColor: Theme.surface2Color
     property bool highlight: false
     property color normalColor: Theme.white
     property color pressedColor: activeColor
@@ -54,7 +54,7 @@ AbstractButton {
             id: dropEffect
 
             anchors.fill: parent
-            color: "#0E0E0E"
+            color: Theme.surfaceColor
             horizontalOffset: 0
             radius: 4.0
             source: topInnerEffect
@@ -112,16 +112,16 @@ AbstractButton {
             when: root.pressed
 
             PropertyChanges {
-                backgroundImage.color: root.checked ? "#3a60be" : root.backgroundColor
+                backgroundImage.color: root.checked ? Theme.accentColor : root.backgroundColor
             }
             PropertyChanges {
                 label.color: root.pressedColor
             }
             PropertyChanges {
-                bottomInnerEffect.color: '#353535'
+                bottomInnerEffect.color: Theme.surface2Color
             }
             PropertyChanges {
-                topInnerEffect.color: '#353535'
+                topInnerEffect.color: Theme.surface2Color
             }
             PropertyChanges {
                 labelGlow.visible: true
@@ -132,16 +132,16 @@ AbstractButton {
             when: (root.highlight || root.checked) && !root.pressed
 
             PropertyChanges {
-                backgroundImage.color: "#2D4EA1"
+                backgroundImage.color: Theme.accentDimColor
             }
             PropertyChanges {
                 label.color: root.activeColor
             }
             PropertyChanges {
-                bottomInnerEffect.color: '#353535'
+                bottomInnerEffect.color: Theme.surface2Color
             }
             PropertyChanges {
-                topInnerEffect.color: '#353535'
+                topInnerEffect.color: Theme.surface2Color
             }
             PropertyChanges {
                 labelGlow.visible: true

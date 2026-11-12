@@ -331,7 +331,7 @@ Rectangle {
     }
 
     clip: true
-    color: '#0E0E0E'
+    color: Theme.surfaceColor
     radius: 5
 
     onModeChanged: {
@@ -376,7 +376,7 @@ Rectangle {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.margins: 15
-                color: '#626262'
+                color: Theme.borderColor
                 font.pixelSize: 14
                 text: "Inputs"
             }
@@ -458,7 +458,7 @@ Rectangle {
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: 1
-            color: '#626262'
+            color: Theme.borderColor
             visible: root.mode == AudioRouter.Mode.Advanced
         }
         ColumnLayout {
@@ -519,7 +519,7 @@ Rectangle {
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: 1
-            color: '#626262'
+            color: Theme.borderColor
             visible: root.mode != AudioRouter.Mode.Legacy
         }
         ColumnLayout {
@@ -531,7 +531,7 @@ Rectangle {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.margins: 15
-                color: '#626262'
+                color: Theme.borderColor
                 font.pixelSize: 14
                 text: "Outputs"
             }
