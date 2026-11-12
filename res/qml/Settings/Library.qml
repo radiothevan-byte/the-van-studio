@@ -16,6 +16,29 @@ Category {
 
     property bool dirty: false
 
+    // THE VAN STUDIO [AI-generated, start]: on Android the folder picker
+    // returns a Storage Access Framework URL such as
+    // content://com.android.externalstorage.documents/tree/primary%3AMusic
+    // which the library scanner cannot open. With "All files access" granted,
+    // the same folder is reachable by its file system path, e.g.
+    // /storage/emulated/0/Music, so convert it.
+    function isAndroidDocumentUrl(url) {
+        return /^content:\/\/com\.android\.externalstorage\.documents\/tree\//.test(url);
+    }
+    function androidDocumentUrlToPath(url) {
+        const match = url.match(/^content:\/\/com\.android\.externalstorage\.documents\/tree\/([^\/]+)/);
+        if (!match) {
+            return url;
+        }
+        const documentId = decodeURIComponent(match[1]);
+        const separator = documentId.indexOf(":");
+        const volume = separator >= 0 ? documentId.substring(0, separator) : documentId;
+        const relativePath = separator >= 0 ? documentId.substring(separator + 1) : "";
+        const base = volume === "primary" ? "/storage/emulated/0" : "/storage/" + volume;
+        return relativePath.length > 0 ? base + "/" + relativePath : base;
+    }
+    // [AI-generated, end]
+
     function load() {
         loadSources();
         integrationRepeater.model = [
@@ -225,9 +248,13 @@ Category {
                                     onAccepted: {
                                         let model = sourceListView.model;
                                         let path = addDialog.selectedFolder.toString();
-                                        path = path.replace(/^file:\/{2,3}/, ""); // FIXME does this work on Windows ?
+                                        if (root.isAndroidDocumentUrl(path)) {
+                                            path = root.androidDocumentUrlToPath(path);
+                                        } else {
+                                            path = decodeURIComponent(path.replace(/^file:\/{2,3}/, "")); // FIXME does this work on Windows ?
+                                        }
                                         model.push({
-                                            path: decodeURIComponent(path)
+                                            path: path
                                         });
                                         root.dirty = true;
                                         sourceListView.model = model;
@@ -315,8 +342,8 @@ Category {
 
                                                 onAccepted: {
                                                     let model = sourceListView.model;
-                                                    let path = selectedFolder.toString().replace(/^(file:\/\/)/, ""); // FIXME does this work on Windows ?
-                                                    model[mouse.index].relink = decodeURIComponent(path);
+                                                    let url = selectedFolder.toString();
+                                                    model[mouse.index].relink = root.isAndroidDocumentUrl(url) ? root.androidDocumentUrlToPath(url) : decodeURIComponent(url.replace(/^(file:\/\/)/, "")); // FIXME does this work on Windows ?
                                                     root.dirty = true;
                                                     sourceListView.model = model;
                                                 }
