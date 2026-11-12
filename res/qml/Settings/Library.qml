@@ -15,6 +15,22 @@ Category {
     id: root
 
     property bool dirty: false
+    // THE VAN STUDIO [AI-generated, start]: Android "All files access"
+    property bool allFilesAccess: Mixxx.StudioSettings.hasAllFilesAccess()
+
+    Timer {
+        // Notice when the user grants the permission in Android settings.
+        interval: 1500
+        repeat: true
+        running: root.visible && !root.allFilesAccess
+        onTriggered: {
+            root.allFilesAccess = Mixxx.StudioSettings.hasAllFilesAccess();
+            if (root.allFilesAccess && !Mixxx.Library.scanner.running) {
+                Mixxx.Library.scanner.start();
+            }
+        }
+    }
+    // [AI-generated, end]
 
     // THE VAN STUDIO [AI-generated, start]: on Android the folder picker
     // returns a Storage Access Framework URL such as
@@ -177,7 +193,7 @@ Category {
     ScrollView {
         id: scrollView
 
-        anchors.bottom: buttonActions.top
+        anchors.bottom: errorMessage.visible ? errorMessage.top : buttonActions.top
         anchors.bottomMargin: 18
         anchors.left: parent.left
         anchors.right: parent.right
@@ -268,7 +284,57 @@ Category {
 
                                     onPressed: addDialog.open()
                                 }
+                                // THE VAN STUDIO [AI-generated, start]
+                                SettingComponents.FormButton {
+                                    activeColor: "#999999"
+                                    backgroundColor: Theme.surface2Color
+                                    enabled: !Mixxx.Library.scanner.running
+                                    opacity: enabled ? 1.0 : 0.5
+                                    text: qsTr("Rescan")
+
+                                    onPressed: Mixxx.Library.scanner.start()
+                                }
+                                // [AI-generated, end]
                             }
+                            // THE VAN STUDIO [AI-generated, start]: without
+                            // "All files access" Android hides the music files
+                            // from the library scanner (0 tracks).
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: 8
+                                Layout.rightMargin: 8
+                                Layout.topMargin: 8
+                                border.color: Theme.yellow
+                                border.width: 1
+                                color: "transparent"
+                                implicitHeight: accessRow.implicitHeight + 16
+                                radius: 8
+                                visible: !root.allFilesAccess
+
+                                RowLayout {
+                                    id: accessRow
+
+                                    anchors.fill: parent
+                                    anchors.margins: 8
+                                    spacing: 10
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        color: Theme.yellow
+                                        font.pixelSize: 13
+                                        text: qsTr("THE VAN STUDIO needs \"All files access\" to read your music folders. Tap Allow, turn it on, then come back.")
+                                        wrapMode: Text.WordWrap
+                                    }
+                                    SettingComponents.FormButton {
+                                        activeColor: "#999999"
+                                        backgroundColor: Theme.accentColor
+                                        text: qsTr("Allow")
+
+                                        onPressed: Mixxx.StudioSettings.openAllFilesAccessSettings()
+                                    }
+                                }
+                            }
+                            // [AI-generated, end]
                             ListView {
                                 id: sourceListView
 
@@ -314,7 +380,7 @@ Category {
                                     }
                                     Rectangle {
                                         anchors.fill: parent
-                                        color: index % 2 == 0 ? '#3F3F3F' : '#2B2B2B'
+                                        color: index % 2 == 0 ? Theme.surface2Color : Theme.surfaceColor
 
                                         // width: 180; height: 40
                                         RowLayout {
@@ -323,8 +389,10 @@ Category {
                                             anchors.rightMargin: 8
 
                                             Text {
-                                                text: qsTr("Icon")
-                                                width: 160
+                                                // THE VAN STUDIO [AI-generated]: folder marker instead of the literal "Icon" placeholder
+                                                color: Theme.accentColor
+                                                font.pixelSize: 16
+                                                text: "\u266B"
                                             }
                                             Text {
                                                 Layout.fillWidth: true
@@ -975,6 +1043,23 @@ Category {
             }
         }
     }
+    // THE VAN STUDIO [AI-generated, start]: error text on its own line above
+    // the buttons, so it never runs under them on a phone screen.
+    Text {
+        id: errorMessage
+
+        anchors.bottom: buttonActions.top
+        anchors.bottomMargin: 10
+        anchors.left: parent.left
+        anchors.right: parent.right
+        color: "#ff6b6b"
+        font.pixelSize: 13
+        horizontalAlignment: Text.AlignRight
+        text: ""
+        visible: text.length > 0
+        wrapMode: Text.WordWrap
+    }
+    // [AI-generated, end]
     Item {
         id: buttonActions
 
@@ -998,14 +1083,6 @@ Category {
             anchors.right: parent.right
             spacing: 10
 
-            Text {
-                id: errorMessage
-
-                Layout.alignment: Qt.AlignVCenter
-                Layout.rightMargin: 16
-                color: "#7D3B3B"
-                text: ""
-            }
             SettingComponents.FormButton {
                 activeColor: "#999999"
                 backgroundColor: "#3F3F3F"
@@ -1019,7 +1096,7 @@ Category {
             }
             SettingComponents.FormButton {
                 activeColor: "#999999"
-                backgroundColor: root.dirty ? "#3a60be" : "#3F3F3F"
+                backgroundColor: root.dirty ? Theme.accentColor : Theme.surface2Color
                 enabled: root.dirty
                 opacity: enabled ? 1.0 : 0.5
                 text: qsTr("Save")

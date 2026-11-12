@@ -4,8 +4,15 @@
 #include "qml/qmlstudiosettingsproxy.h"
 
 #include <QDir>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QStandardPaths>
 #include <QStorageInfo>
+#include <cmath>
+#ifdef Q_OS_ANDROID
+#include <QJniEnvironment>
+#include <QJniObject>
+#endif
 
 #include "encoder/encoder.h"
 #include "encoder/encoderrecordingsettings.h"
@@ -351,6 +358,52 @@ QString QmlStudioSettingsProxy::saveBroadcastSettings(const QVariantMap& setting
 #else
     Q_UNUSED(settings);
     return QStringLiteral("Live broadcasting is not available in this build");
+#endif
+}
+
+QVariantMap QmlStudioSettingsProxy::safeAreaInsets() const {
+    QVariantMap result{{"left", 0}, {"top", 0}, {"right", 0}, {"bottom", 0}};
+#ifdef Q_OS_ANDROID
+    QJniObject array = QJniObject::callStaticObjectMethod(
+            "org/mixxx/MainActivity", "getSafeInsets", "()[I");
+    if (!array.isValid()) {
+        return result;
+    }
+    QJniEnvironment env;
+    auto jArray = array.object<jintArray>();
+    if (env->GetArrayLength(jArray) != 4) {
+        return result;
+    }
+    jint values[4];
+    env->GetIntArrayRegion(jArray, 0, 4, values);
+    qreal ratio = 1.0;
+    if (const QScreen* pScreen = QGuiApplication::primaryScreen()) {
+        ratio = pScreen->devicePixelRatio();
+    }
+    if (ratio <= 0) {
+        ratio = 1.0;
+    }
+    result["left"] = static_cast<int>(std::ceil(values[0] / ratio));
+    result["top"] = static_cast<int>(std::ceil(values[1] / ratio));
+    result["right"] = static_cast<int>(std::ceil(values[2] / ratio));
+    result["bottom"] = static_cast<int>(std::ceil(values[3] / ratio));
+#endif
+    return result;
+}
+
+bool QmlStudioSettingsProxy::hasAllFilesAccess() const {
+#ifdef Q_OS_ANDROID
+    return QJniObject::callStaticMethod<jboolean>(
+            "org/mixxx/MainActivity", "hasAllFilesAccess", "()Z");
+#else
+    return true;
+#endif
+}
+
+void QmlStudioSettingsProxy::openAllFilesAccessSettings() const {
+#ifdef Q_OS_ANDROID
+    QJniObject::callStaticMethod<void>(
+            "org/mixxx/MainActivity", "openAllFilesAccessSettings", "()V");
 #endif
 }
 

@@ -24,6 +24,8 @@ Item {
     readonly property bool show4decks: show4DecksButton.checked && show4DecksButton.visible
     property alias showEffects: showEffectsButton.checked
     property alias showSamplers: showSamplersButton.checked
+    // THE VAN STUDIO [AI-generated]: tighter studio bar on phone screens
+    readonly property bool compactBar: width < 1000
 
     Loader {
         id: nativeApplicationMenuLoader
@@ -139,7 +141,7 @@ Item {
                         color: Theme.textColor
                         font.bold: true
                         font.family: Theme.fontFamily
-                        font.pixelSize: 17
+                        font.pixelSize: root.compactBar ? 14 : 17
                         text: "THE VAN STUDIO"
                     }
                 }
@@ -148,6 +150,7 @@ Item {
 
                     Layout.alignment: Qt.AlignVCenter
                     active: studioBroadcastEnabled.value > 0
+                    compact: root.compactBar
                     text: active ? "● ON AIR" : "● " + qsTr("GO LIVE")
                     visible: Mixxx.Application.liveBroadcastingAvailable
 
@@ -166,6 +169,7 @@ Item {
 
                     Layout.alignment: Qt.AlignVCenter
                     active: studioRecordingStatus.value === 2
+                    compact: root.compactBar
                     text: "● REC"
 
                     onStartRequested: studioRecordingToggle.trigger()
@@ -185,7 +189,7 @@ Item {
                     }
                 }
                 Item {
-                    Layout.preferredWidth: 16
+                    Layout.preferredWidth: root.compactBar ? 4 : 16
                 }
                 // [AI-generated, end]
                 Skin.Button {
@@ -300,12 +304,12 @@ Item {
                     readonly property bool micOn: studioMicTalkover.value > 0
 
                     Layout.alignment: Qt.AlignVCenter
-                    Layout.leftMargin: 24
+                    Layout.leftMargin: root.compactBar ? 12 : 24
                     border.color: Theme.yellow
                     border.width: 2
                     color: micOn ? Theme.yellow : Theme.surface2Color
                     implicitHeight: 44
-                    implicitWidth: 120
+                    implicitWidth: root.compactBar ? 88 : 120
                     radius: 14
 
                     Text {
@@ -313,7 +317,7 @@ Item {
                         color: micButton.micOn ? Theme.onAccentTextColor : Theme.textColor
                         font.bold: true
                         font.family: Theme.fontFamily
-                        font.pixelSize: 16
+                        font.pixelSize: root.compactBar ? 14 : 16
                         text: micButton.micOn ? "MIC ON" : "MIC"
                     }
                     MouseArea {

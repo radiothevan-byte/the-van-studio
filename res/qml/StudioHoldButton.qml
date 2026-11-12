@@ -12,6 +12,7 @@ Item {
     id: root
 
     property bool active: false
+    property bool compact: false
     property color activeColor: Theme.liveColor
     property int holdDuration: 1500
     property real holdProgress: 0
@@ -31,7 +32,7 @@ Item {
     }
 
     implicitHeight: 44
-    implicitWidth: Math.max(112, label.implicitWidth + 36)
+    implicitWidth: Math.max(compact ? 92 : 112, label.implicitWidth + (compact ? 24 : 36))
 
     Rectangle {
         id: background
@@ -58,7 +59,7 @@ Item {
             font.bold: true
             font.family: Theme.fontFamily
             font.letterSpacing: 1
-            font.pixelSize: 15
+            font.pixelSize: root.compact ? 13 : 15
             text: root.holdProgress > 0 ? root.holdText : root.text
         }
     }

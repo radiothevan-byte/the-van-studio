@@ -58,6 +58,16 @@ class QmlStudioSettingsProxy : public QObject {
     Q_INVOKABLE QString saveRecordingSettings(const QVariantMap& settings);
     Q_INVOKABLE QString defaultRecordingDirectory() const;
 
+    // ---- Android screen and storage ----
+    /// Screen area to keep free (camera cutout), in device independent
+    /// pixels: {left, top, right, bottom}. All zero on other platforms.
+    Q_INVOKABLE QVariantMap safeAreaInsets() const;
+    /// True if the music library can read any folder. Always true on
+    /// platforms without Android's "All files access" permission.
+    Q_INVOKABLE bool hasAllFilesAccess() const;
+    /// Opens the Android settings screen for "All files access".
+    Q_INVOKABLE void openAllFilesAccessSettings() const;
+
     // ---- Live broadcasting ----
     /// All fields of the first broadcast profile (see the .cpp for keys).
     Q_INVOKABLE QVariantMap broadcastSettings() const;

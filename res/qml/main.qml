@@ -20,6 +20,35 @@ ApplicationWindow {
     visible: true
     width: isMobile ? Screen.width : designWidth
 
+    // THE VAN STUDIO [AI-generated, start]: keep the UI clear of the camera
+    // cutout. The window covers the whole screen on Android; these margins
+    // (device independent pixels) come from Android's window insets.
+    property var safeInsets: ({left: 0, top: 0, right: 0, bottom: 0})
+
+    function updateSafeInsets() {
+        if (!isMobile) {
+            return;
+        }
+        const insets = Mixxx.StudioSettings.safeAreaInsets();
+        if (insets.left !== safeInsets.left || insets.top !== safeInsets.top
+                || insets.right !== safeInsets.right || insets.bottom !== safeInsets.bottom) {
+            safeInsets = insets;
+        }
+    }
+
+    onWidthChanged: updateSafeInsets()
+    onHeightChanged: updateSafeInsets()
+
+    Timer {
+        // Insets are only known once Android has laid out the window, and
+        // change when the phone is turned around.
+        interval: 1000
+        repeat: true
+        running: root.isMobile
+        onTriggered: root.updateSafeInsets()
+    }
+    // [AI-generated, end]
+
     function updateVisibility() {
         if (!Mixxx.Core.ready) {
             return;
@@ -42,6 +71,10 @@ ApplicationWindow {
         id: content
 
         anchors.fill: parent
+        anchors.bottomMargin: root.safeInsets.bottom
+        anchors.leftMargin: root.safeInsets.left
+        anchors.rightMargin: root.safeInsets.right
+        anchors.topMargin: root.safeInsets.top
 
         active: Mixxx.Core.ready
         asynchronous: true
