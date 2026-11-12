@@ -26,10 +26,10 @@ Rectangle {
 
         anchors.left: parent.left
         anchors.leftMargin: 16
-        anchors.right: switchTrack.left
-        anchors.rightMargin: 16
         anchors.verticalCenter: parent.verticalCenter
         spacing: 2
+        // Never negative, also while the page is hidden and has no size yet.
+        width: Math.max(80, root.width - 102)
 
         Text {
             Layout.fillWidth: true

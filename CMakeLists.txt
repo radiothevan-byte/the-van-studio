@@ -3777,7 +3777,7 @@ find_package(PortAudio REQUIRED)
 target_link_libraries(mixxx-lib PUBLIC PortAudio::PortAudio)
 
 if(ANDROID)
-  target_link_libraries(mixxx-lib PUBLIC OpenSLES android)
+  target_link_libraries(mixxx-lib PUBLIC OpenSLES android log)
   target_compile_definitions(mixxx-lib PUBLIC PA_USE_OBOE)
 endif()
 

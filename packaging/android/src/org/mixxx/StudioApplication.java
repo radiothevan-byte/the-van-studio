@@ -55,8 +55,32 @@ public class StudioApplication extends QtApplication {
                 previous.uncaughtException(thread, error);
             }
         });
-        // Save the log of the previous run in the background.
-        new Thread(() -> saveLog("start", null), "VanStudioLog").start();
+        // Save the log of the previous run in the background. Mixxx's own
+        // log file is read now, before Qt starts and rotates it.
+        final String previousMixxxLog = readPreviousMixxxLog();
+        new Thread(() -> saveLog("start", previousMixxxLog), "VanStudioLog").start();
+    }
+
+    // The end of Mixxx's log file from the previous run (files/mixxx.log).
+    private String readPreviousMixxxLog() {
+        final long maxBytes = 1500 * 1024;
+        java.io.File file = new java.io.File(getFilesDir(), "mixxx.log");
+        if (!file.isFile()) {
+            return null;
+        }
+        try (java.io.RandomAccessFile in = new java.io.RandomAccessFile(file, "r")) {
+            long length = in.length();
+            long start = Math.max(0, length - maxBytes);
+            in.seek(start);
+            byte[] data = new byte[(int) (length - start)];
+            in.readFully(data);
+            return "===== Mixxx log of the previous run (last "
+                    + data.length / 1024 + " KB of " + length / 1024 + " KB) =====\n"
+                    + new String(data, StandardCharsets.UTF_8)
+                    + "\n===== end of Mixxx log =====";
+        } catch (Exception e) {
+            return "Could not read the previous Mixxx log: " + e;
+        }
     }
 
     private void saveLog(String kind, String header) {
@@ -71,7 +95,7 @@ public class StudioApplication extends QtApplication {
         }
         try {
             Process process = Runtime.getRuntime().exec(
-                    new String[] {"logcat", "-d", "-v", "threadtime", "-t", "4000"});
+                    new String[] {"logcat", "-d", "-v", "threadtime", "-t", "20000"});
             try (BufferedReader reader = new BufferedReader(
                          new InputStreamReader(process.getInputStream(),
                                  StandardCharsets.UTF_8))) {

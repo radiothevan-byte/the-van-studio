@@ -2,6 +2,9 @@
 
 #include <signal.h>
 #include <stdio.h>
+#ifdef Q_OS_ANDROID
+#include <android/log.h>
+#endif
 
 #include <QByteArray>
 #include <QDateTime>
@@ -198,6 +201,31 @@ inline void writeToStdErr(
             formattedMessageStr.replace(kThreadNamePattern, threadName)
                     .toLocal8Bit();
 
+#ifdef Q_OS_ANDROID
+    // THE VAN STUDIO [AI-generated]: stderr is discarded on Android, so also
+    // send the message to the system log (logcat). The app saves logcat to
+    // Download/THE VAN STUDIO for diagnosis.
+    {
+        int priority = ANDROID_LOG_DEBUG;
+        switch (type) {
+        case QtInfoMsg:
+            priority = ANDROID_LOG_INFO;
+            break;
+        case QtWarningMsg:
+            priority = ANDROID_LOG_WARN;
+            break;
+        case QtCriticalMsg:
+            priority = ANDROID_LOG_ERROR;
+            break;
+        case QtFatalMsg:
+            priority = ANDROID_LOG_FATAL;
+            break;
+        default:
+            break;
+        }
+        __android_log_write(priority, "mixxx", formattedMessage.constData());
+    }
+#endif
     const auto locked = QMutexLocker(&s_mutexStdErr);
     const std::size_t written = fwrite(
             formattedMessage.constData(), sizeof(char), formattedMessage.size(), stderr);

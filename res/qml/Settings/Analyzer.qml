@@ -38,18 +38,19 @@ Category {
     Component.onCompleted: root.load()
 
     Flickable {
+        id: flick
+
         anchors.fill: parent
         clip: true
+        contentWidth: width
         contentHeight: content.implicitHeight + 32
 
         ColumnLayout {
             id: content
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.top: parent.top
-            anchors.topMargin: 12
+            // Fixed width, never negative, independent of the content.
+            width: Math.max(200, flick.width - 8)
+            y: 12
             spacing: 10
 
             Text {

@@ -95,18 +95,19 @@ Category {
         key: "output_latency_ms"
     }
     Flickable {
+        id: flick
+
         anchors.fill: parent
         clip: true
+        contentWidth: width
         contentHeight: content.implicitHeight + 32
 
         ColumnLayout {
             id: content
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            anchors.top: parent.top
-            anchors.topMargin: 12
+            // Fixed width, never negative, independent of the content.
+            width: Math.max(200, flick.width - 8)
+            y: 12
             spacing: 12
 
             Text {
@@ -119,7 +120,7 @@ Category {
             GridLayout {
                 Layout.fillWidth: true
                 columnSpacing: 12
-                columns: root.width > 640 ? 2 : 1
+                columns: 2
                 rowSpacing: 12
 
                 StatCard {
