@@ -583,12 +583,14 @@ void SoundManager::checkConfig() {
     // Builds before this one configured no microphone input, so the MIC
     // button had no effect. Add the built-in microphone once; if the user
     // removes it later in Sound hardware, it is not added again.
+    // The flag is set only once a microphone was actually added (the first
+    // version looked for the English device name only and never found the
+    // microphone on phones in other languages).
     const ConfigKey micDefaultKey(QStringLiteral("[VanStudio]"),
-            QStringLiteral("DefaultMicrophoneApplied"));
-    if (!m_pConfig->getValue<bool>(micDefaultKey, false)) {
-        if (m_config.addDefaultAndroidMicrophone(this)) {
-            m_config.writeToDisk();
-        }
+            QStringLiteral("DefaultMicrophoneAdded"));
+    if (!m_pConfig->getValue<bool>(micDefaultKey, false) &&
+            m_config.addDefaultAndroidMicrophone(this)) {
+        m_config.writeToDisk();
         m_pConfig->setValue(micDefaultKey, true);
     }
     // [AI-generated, end]

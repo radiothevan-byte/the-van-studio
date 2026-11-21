@@ -10,6 +10,22 @@
 #include "util/cmdlineargs.h"
 #include "util/math.h"
 
+#ifdef __ANDROID__
+namespace {
+// THE VAN STUDIO [AI-generated, start]
+// PortAudioEnumerator registers Android devices as "<product>: <type>",
+// with the type name translated (e.g. "Μικρόφωνο" on a Greek phone). The
+// enumerator has no Q_OBJECT, so its tr() is QObject::tr(). Match both the
+// English and the translated type name.
+bool androidDeviceHasType(const SoundDevicePointer& pDevice, const char* typeName) {
+    const QString name = pDevice->getDisplayName();
+    return name.endsWith(QStringLiteral(": ") + QString::fromLatin1(typeName)) ||
+            name.endsWith(QStringLiteral(": ") + QObject::tr(typeName));
+}
+// [AI-generated, end]
+} // namespace
+#endif
+
 const QString SoundManagerConfig::kAPINone = QStringLiteral("None");
 const QString SoundManagerConfig::kAPIJack = QStringLiteral("JACK Audio Connection Kit");
 const QString SoundManagerConfig::kAPIAlsa = QStringLiteral("ALSA");
@@ -585,7 +601,7 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
             // a remote submix would otherwise be picked if listed first).
             QList<SoundDevicePointer> orderedDevices;
             for (const auto& pDevice : outputDevices) {
-                if (pDevice->getDisplayName().endsWith(QStringLiteral(": Speaker"))) {
+                if (androidDeviceHasType(pDevice, "Speaker")) {
                     orderedDevices.prepend(pDevice);
                 } else {
                     orderedDevices.append(pDevice);
@@ -647,7 +663,7 @@ bool SoundManagerConfig::addDefaultAndroidMicrophone(SoundManager* soundManager)
             soundManager->getDeviceList(m_api, false, true);
     for (const auto& pDevice : inputDevices) {
         // Registered by PortAudioEnumerator as "<product>: Microphone".
-        if (!pDevice->getDisplayName().endsWith(QStringLiteral(": Microphone")) ||
+        if (!androidDeviceHasType(pDevice, "Microphone") ||
                 pDevice->getNumInputChannels() < 1) {
             continue;
         }
