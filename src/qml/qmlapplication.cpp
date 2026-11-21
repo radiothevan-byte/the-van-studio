@@ -9,6 +9,7 @@
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QTextDocument>
+#include <QTimer>
 #include <memory>
 #include <utility>
 
@@ -68,6 +69,19 @@ auto lambda_to_singleton_type_factory_ptr(F&& f) {
     };
 }
 #if defined(Q_OS_ANDROID)
+// THE VAN STUDIO [AI-generated]: RECORD_AUDIO granted to the app?
+bool hasAndroidMicrophonePermission() {
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    if (!context.isValid()) {
+        return false;
+    }
+    const jint result = context.callMethod<jint>("checkSelfPermission",
+            "(Ljava/lang/String;)I",
+            QJniObject::fromString(QStringLiteral("android.permission.RECORD_AUDIO"))
+                    .object<jstring>());
+    return result == 0; // PackageManager.PERMISSION_GRANTED
+}
+
 bool canWriteToExternalStorage() {
     // API 30+ (Android 11+) requires MANAGE_EXTERNAL_STORAGE.
     // Older: WRITE_EXTERNAL_STORAGE is granted at install time.
@@ -232,6 +246,75 @@ QmlApplication::QmlApplication(
         qInfo() << "Sound devices ready, audio API:"
                 << m_pCoreServices->getSoundManager()->getConfig().getAPI();
     }
+#ifdef Q_OS_ANDROID
+    // THE VAN STUDIO [AI-generated, start]
+    // On a new install the sound devices are opened while Android is still
+    // asking for the microphone permission. A microphone stream opened
+    // without the permission stays silent, so reopen the sound devices once
+    // the permission has been granted.
+    if (!hasAndroidMicrophonePermission()) {
+        qInfo() << "Microphone permission not granted yet; sound devices "
+                   "will be reopened once it is";
+        auto* pPermissionTimer = new QTimer(this);
+        pPermissionTimer->setInterval(1000);
+        connect(pPermissionTimer, &QTimer::timeout, this, [this, pPermissionTimer]() {
+            if (!hasAndroidMicrophonePermission()) {
+                return;
+            }
+            pPermissionTimer->stop();
+            pPermissionTimer->deleteLater();
+            qInfo() << "Microphone permission granted, reopening sound devices";
+            const SoundDeviceStatus status =
+                    m_pCoreServices->getSoundManager()->setupDevices();
+            if (status != SoundDeviceStatus::Ok) {
+                qCritical() << "Error reopening sound devices:"
+                            << m_pCoreServices->getSoundManager()
+                                       ->getLastErrorMessage(status);
+            }
+        });
+        pPermissionTimer->start();
+    }
+    // Microphone diagnostics for the saved log: every 5 seconds while the
+    // microphone is switched on, write its state and level.
+    {
+        auto* pMicConfigured = new ControlProxy(
+                QStringLiteral("[Microphone]"),
+                QStringLiteral("input_configured"),
+                this,
+                ControlFlag::NoAssertIfMissing);
+        auto* pMicTalkover = new ControlProxy(
+                QStringLiteral("[Microphone]"),
+                QStringLiteral("talkover"),
+                this,
+                ControlFlag::NoAssertIfMissing);
+        auto* pMicVu = new ControlProxy(
+                QStringLiteral("[Microphone]"),
+                QStringLiteral("vu_meter"),
+                this,
+                ControlFlag::NoAssertIfMissing);
+        auto* pMicPregain = new ControlProxy(
+                QStringLiteral("[Microphone]"),
+                QStringLiteral("pregain"),
+                this,
+                ControlFlag::NoAssertIfMissing);
+        auto* pMicLogTimer = new QTimer(this);
+        pMicLogTimer->setInterval(5000);
+        connect(pMicLogTimer,
+                &QTimer::timeout,
+                this,
+                [pMicConfigured, pMicTalkover, pMicVu, pMicPregain]() {
+                    if (pMicTalkover->get() <= 0) {
+                        return;
+                    }
+                    qInfo() << "Microphone: input_configured" << pMicConfigured->get()
+                            << "talkover" << pMicTalkover->get() << "level"
+                            << pMicVu->get() << "pregain" << pMicPregain->get()
+                            << "permission" << hasAndroidMicrophonePermission();
+                });
+        pMicLogTimer->start();
+    }
+    // [AI-generated, end]
+#endif
 
     setupSpinnyCoverControls();
 

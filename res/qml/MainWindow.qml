@@ -337,7 +337,33 @@ Item {
                         font.bold: true
                         font.family: Theme.fontFamily
                         font.pixelSize: root.compactBar ? 14 : 16
-                        text: micButton.micOn ? "MIC ON" : "MIC"
+                        // "NO MIC": no sound input is routed to Microphone 1
+                        text: studioMicConfigured.value > 0 ? (micButton.micOn ? "MIC ON" : "MIC") : "NO MIC"
+                    }
+                    Rectangle {
+                        // Live microphone level, so it is visible whether
+                        // the phone delivers any sound from the microphone.
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 5
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        color: micButton.micOn ? Theme.onAccentTextColor : Theme.accentColor
+                        height: 4
+                        radius: 2
+                        visible: studioMicConfigured.value > 0
+                        width: (parent.width - 20) * Math.min(1, Math.max(0, studioMicVu.value))
+                    }
+                    Mixxx.ControlProxy {
+                        id: studioMicConfigured
+
+                        group: "[Microphone]"
+                        key: "input_configured"
+                    }
+                    Mixxx.ControlProxy {
+                        id: studioMicVu
+
+                        group: "[Microphone]"
+                        key: "vu_meter"
                     }
                     MouseArea {
                         anchors.fill: parent
