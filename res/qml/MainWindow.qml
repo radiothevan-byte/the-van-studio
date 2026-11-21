@@ -231,6 +231,10 @@ Item {
                     activeColor: Theme.white
                     checkable: true
                     text: "Effects"
+
+                    // THE VAN STUDIO [AI-generated]: one panel at a time
+                    onCheckedChanged: if (checked)
+                        showSamplersButton.checked = false
                 }
                 Skin.Button {
                     id: showAuxButton
@@ -239,6 +243,9 @@ Item {
                     activeColor: Theme.white
                     checkable: true
                     text: "Aux"
+                    // THE VAN STUDIO [AI-generated]: nothing is connected to
+                    // this button yet in the QML skin, so do not show it.
+                    visible: false
                 }
                 Skin.Button {
                     id: showSamplersButton
@@ -247,6 +254,10 @@ Item {
                     activeColor: Theme.white
                     checkable: true
                     text: "Sampler"
+
+                    // THE VAN STUDIO [AI-generated]: one panel at a time
+                    onCheckedChanged: if (checked)
+                        showEffectsButton.checked = false
                 }
                 Item {
                     Layout.fillWidth: true
@@ -812,6 +823,116 @@ Item {
             }
         }
     }
+    // THE VAN STUDIO [AI-generated, start]
+    // Effects and Sampler panels. The upstream QML skin has these rows
+    // commented out of the main layout; on a phone they open as a panel over
+    // the lower part of the screen instead, so the decks keep their size.
+    component StudioBottomPanel: Popup {
+        id: panel
+
+        property Component content
+        property bool shown: false
+        property string title: ""
+
+        signal closeRequested
+
+        closePolicy: Popup.CloseOnEscape
+        height: Math.min(parent.height * 0.62, Math.max(220, panelLoader.implicitHeight + 64))
+        modal: false
+        padding: 0
+        width: parent.width
+        x: 0
+        y: parent.height - height
+
+        background: Rectangle {
+            border.color: Theme.borderColor
+            color: Theme.backgroundColor
+            radius: 18
+        }
+        contentItem: Item {
+            Text {
+                id: panelTitle
+
+                anchors.left: parent.left
+                anchors.leftMargin: 18
+                anchors.top: parent.top
+                anchors.topMargin: 14
+                color: Theme.accentColor
+                font.bold: true
+                font.letterSpacing: 1
+                font.pixelSize: 14
+                text: panel.title
+            }
+            Rectangle {
+                anchors.right: parent.right
+                anchors.rightMargin: 12
+                anchors.top: parent.top
+                anchors.topMargin: 6
+                border.color: Theme.borderColor
+                color: Theme.surface2Color
+                height: 40
+                radius: 20
+                width: 40
+
+                Text {
+                    anchors.centerIn: parent
+                    color: Theme.textColor
+                    font.pixelSize: 18
+                    text: "✕"
+                }
+                TapHandler {
+                    onTapped: panel.closeRequested()
+                }
+            }
+            Flickable {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.margins: 8
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 52
+                clip: true
+                contentHeight: panelLoader.implicitHeight
+                contentWidth: width
+
+                Loader {
+                    id: panelLoader
+
+                    active: panel.shown
+                    sourceComponent: panel.content
+                    width: parent.width
+                }
+            }
+        }
+
+        onClosed: panel.closeRequested()
+        onShownChanged: panel.shown ? panel.open() : panel.close()
+    }
+
+    StudioBottomPanel {
+        shown: root.showEffects
+        title: qsTr("EFFECTS")
+
+        content: Component {
+            Skin.EffectRow {
+            }
+        }
+
+        onCloseRequested: showEffectsButton.checked = false
+    }
+    StudioBottomPanel {
+        shown: root.showSamplers
+        title: qsTr("SAMPLER")
+
+        content: Component {
+            Skin.SamplerRow {
+                columns: 4
+            }
+        }
+
+        onCloseRequested: showSamplersButton.checked = false
+    }
+    // [AI-generated, end]
     Skin.Settings {
         id: settingsPopup
 

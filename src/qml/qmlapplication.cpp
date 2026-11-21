@@ -68,12 +68,6 @@ auto lambda_to_singleton_type_factory_ptr(F&& f) {
     };
 }
 #if defined(Q_OS_ANDROID)
-// Directories under res/qml/ that are compiled into the binary as QML modules
-// and should not be copied to external storage.
-const QStringList kSkipQmlDirs = {
-        QStringLiteral("Mixxx"),
-};
-
 bool canWriteToExternalStorage() {
     // API 30+ (Android 11+) requires MANAGE_EXTERNAL_STORAGE.
     // Older: WRITE_EXTERNAL_STORAGE is granted at install time.
@@ -82,28 +76,6 @@ bool canWriteToExternalStorage() {
                 "android/os/Environment", "isExternalStorageManager");
     }
     return true;
-}
-
-void copyAssetDir(const QString& src, const QString& dst) {
-    QDir().mkpath(dst);
-
-    QDir srcDir(src);
-    const QStringList files = srcDir.entryList(QDir::Files);
-    for (const QString& file : files) {
-        QFile srcFile(srcDir.absoluteFilePath(file));
-        QFile dstFile(dst + '/' + file);
-        if (srcFile.open(QIODevice::ReadOnly) && dstFile.open(QIODevice::WriteOnly)) {
-            dstFile.write(srcFile.readAll());
-        }
-    }
-
-    const QStringList dirs = srcDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for (const QString& dir : dirs) {
-        if (kSkipQmlDirs.contains(dir)) {
-            continue;
-        }
-        copyAssetDir(src + '/' + dir, dst + '/' + dir);
-    }
 }
 #endif
 } // namespace
@@ -133,11 +105,25 @@ QmlApplication::QmlApplication(
     QQuickStyle::setStyle("Basic");
 
 #if defined(Q_OS_ANDROID)
-    if (canWriteToExternalStorage()) {
-        const QString externalQmlDir = QStringLiteral("/storage/emulated/0/Mixxx/qml");
-        copyAssetDir(QStringLiteral("assets:/qml"), externalQmlDir);
+    // THE VAN STUDIO [AI-generated, start]
+    // The QML files are loaded from the APK itself, so they always match the
+    // installed version. Previously they were copied to shared storage on
+    // every start and loaded from there: files removed in a newer APK stayed
+    // behind, a partly failed copy mixed versions, and the copy ran on each
+    // start. Developers can still load edited QML from shared storage by
+    // creating the marker file below; nothing in that folder is copied over
+    // or deleted.
+    const QString externalQmlDir = QStringLiteral("/storage/emulated/0/Mixxx/qml");
+    const QString developerMarker = externalQmlDir + QStringLiteral("/USE_THIS_QML");
+    if (canWriteToExternalStorage() && QFile::exists(developerMarker) &&
+            QFile::exists(externalQmlDir + QStringLiteral("/main.qml"))) {
+        qWarning() << "Loading QML from" << externalQmlDir
+                   << "instead of the APK (developer marker found)";
         m_mainFilePath = externalQmlDir + QStringLiteral("/main.qml");
+    } else {
+        qInfo() << "Loading QML from the APK:" << m_mainFilePath;
     }
+    // [AI-generated, end]
 #endif
 
     const QString colorScheme = m_pCoreServices->getSettings()->getValueString(
@@ -233,10 +219,18 @@ QmlApplication::QmlApplication(
     SoundDeviceStatus result = m_pCoreServices->getSoundManager()->setupDevices();
     if (result != SoundDeviceStatus::Ok) {
         const int reInt = static_cast<int>(result);
-        qCritical() << "Error setting up sound devices:" << reInt;
+        // THE VAN STUDIO [AI-generated]: say which device failed and why
+        qCritical() << "Error setting up sound devices:" << reInt
+                    << m_pCoreServices->getSoundManager()->getLastErrorMessage(result);
 #ifndef Q_OS_ANDROID
         exit(reInt);
 #endif
+    }
+
+    if (result == SoundDeviceStatus::Ok) {
+        // THE VAN STUDIO [AI-generated]
+        qInfo() << "Sound devices ready, audio API:"
+                << m_pCoreServices->getSoundManager()->getConfig().getAPI();
     }
 
     setupSpinnyCoverControls();

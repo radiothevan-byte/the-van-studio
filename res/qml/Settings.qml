@@ -25,6 +25,7 @@ Popup {
     property alias sections: managerItem.data
 
     function updateActiveCategory() {
+        console.info("Settings: activate category", categoryList.currentIndex, managerItem.data[categoryList.currentIndex]?.label);
         root.activeCategory?.deactivated();
         root.activeCategory = managerItem.data[categoryList.currentIndex] ?? null;
         root.activeCategory?.activated();
@@ -33,7 +34,11 @@ Popup {
     horizontalPadding: compact ? 8 : 20
     verticalPadding: compact ? 8 : 20
 
-    onOpened: root.pageOpen = false
+    onClosed: console.info("Settings: closed")
+    onOpened: {
+        console.info("Settings: opened, compact layout:", root.compact, "size:", width, "x", height);
+        root.pageOpen = false;
+    }
 
     background: Rectangle {
         anchors.fill: parent
@@ -108,21 +113,34 @@ Popup {
         }
         // [AI-generated, end]
 
-        RowLayout {
+        // THE VAN STUDIO [AI-generated, start]: the pages always keep their
+        // full size. On a phone the category list is drawn on top of the
+        // page instead of hiding the page: hidden pages had no size, and the
+        // Sound hardware router could then keep recalculating its layout and
+        // freeze the app when Settings opened.
+        Item {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: settingsHeader.bottom
             anchors.topMargin: 8
-            spacing: root.compact ? 0 : 16
 
             Rectangle {
-                Layout.fillHeight: true
-                Layout.fillWidth: root.compact
-                Layout.preferredWidth: root.compact ? -1 : 280
+                id: categoryPanel
+
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.top: parent.top
                 color: Theme.surfaceColor
                 radius: 14
                 visible: root.showList
+                width: root.compact ? parent.width : 280
+                z: 2
+
+                MouseArea {
+                    // Keep touches on the list from reaching the page below.
+                    anchors.fill: parent
+                }
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -314,9 +332,14 @@ Popup {
                 }
             }
             ColumnLayout {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                visible: root.showPage
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.leftMargin: root.compact ? 0 : 296
+                anchors.right: parent.right
+                anchors.top: parent.top
+                // Hidden under the category list on phones, but laid out.
+                opacity: root.showPage ? 1 : 0
+                // [AI-generated, end]
 
                 Rectangle {
                     id: tabBar

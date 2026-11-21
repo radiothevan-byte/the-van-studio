@@ -548,6 +548,21 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
                 m_api = SoundManagerConfig::kAPIDirectSound;
             }
 #endif
+#ifdef __ANDROID__
+            // THE VAN STUDIO [AI-generated, start]
+            // No Android case existed here, so the API stayed "None": no
+            // output device was opened and decks played without sound. Use
+            // the Oboe API that PortAudio provides on Android.
+            m_api = apiList.first();
+            for (const QString& api : std::as_const(apiList)) {
+                if (api.contains(QStringLiteral("Oboe"), Qt::CaseInsensitive)) {
+                    m_api = api;
+                    break;
+                }
+            }
+            qInfo() << "SoundManagerConfig: default Android audio API" << m_api;
+            // [AI-generated, end]
+#endif
 #ifdef Q_OS_IOS
             m_api = SoundManagerConfig::kAPIIosAudio;
 #elif defined(Q_OS_MACOS)
@@ -563,7 +578,24 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
         const QList<SoundDevicePointer> outputDevices =
                 soundManager->getDeviceList(m_api, true, false);
         if (!outputDevices.isEmpty()) {
+#ifdef __ANDROID__
+            // THE VAN STUDIO [AI-generated, start]
+            // Prefer the phone's built-in loudspeaker, so the first start
+            // plays from the speaker without extra hardware (the earpiece or
+            // a remote submix would otherwise be picked if listed first).
+            QList<SoundDevicePointer> orderedDevices;
             for (const auto& pDevice : outputDevices) {
+                if (pDevice->getDisplayName().endsWith(QStringLiteral(": Speaker"))) {
+                    orderedDevices.prepend(pDevice);
+                } else {
+                    orderedDevices.append(pDevice);
+                }
+            }
+            // [AI-generated, end]
+#else
+            const QList<SoundDevicePointer>& orderedDevices = outputDevices;
+#endif
+            for (const auto& pDevice : orderedDevices) {
                 if (pDevice->getNumOutputChannels() < 2) {
                     continue;
                 }
@@ -573,6 +605,8 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
                         0);
                 addOutput(pDevice->getDeviceId(), mainOut);
                 defaultSampleRate = pDevice->getDefaultSampleRate();
+                qInfo() << "SoundManagerConfig: default main output"
+                        << pDevice->getDisplayName() << "at" << defaultSampleRate;
                 break;
             }
         }

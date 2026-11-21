@@ -571,6 +571,17 @@ SoundDeviceStatus SoundManager::setConfig(const SoundManagerConfig& config) {
 }
 
 void SoundManager::checkConfig() {
+#ifdef __ANDROID__
+    // THE VAN STUDIO [AI-generated, start]
+    // Earlier builds saved the API "None" on Android (no sound at all).
+    // Replace it with the default Android API and output device.
+    if (m_config.getAPI() == SoundManagerConfig::kAPINone &&
+            !getHostAPIList().isEmpty()) {
+        qInfo() << "SoundManager: no audio API configured, loading Android defaults";
+        m_config.loadDefaults(this, SoundManagerConfig::API | SoundManagerConfig::DEVICES);
+    }
+    // [AI-generated, end]
+#endif
     if (!m_config.checkAPI()) {
         m_config.setAPI(SoundManagerConfig::kAPINone);
         m_config.loadDefaults(this, SoundManagerConfig::API | SoundManagerConfig::DEVICES);
