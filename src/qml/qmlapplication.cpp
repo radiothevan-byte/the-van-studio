@@ -312,6 +312,23 @@ QmlApplication::QmlApplication(
                             << "permission" << hasAndroidMicrophonePermission();
                 });
         pMicLogTimer->start();
+        // Log switching the microphone and recording on and off right away.
+        pMicTalkover->connectValueChanged(this, [pMicConfigured, pMicVu](double value) {
+            qInfo() << "Microphone: MIC button" << (value > 0 ? "on" : "off")
+                    << "input_configured" << pMicConfigured->get() << "level"
+                    << pMicVu->get();
+        });
+        auto* pRecordingStatus = new ControlProxy(QStringLiteral("[Recording]"),
+                QStringLiteral("status"),
+                this,
+                ControlFlag::NoAssertIfMissing);
+        pRecordingStatus->connectValueChanged(this, [this](double value) {
+            qInfo() << "Recording: status" << value << "(0 off, 1 ready, 2 recording)"
+                    << "folder"
+                    << m_pCoreServices->getSettings()->getValueString(
+                               ConfigKey(QStringLiteral("[Recording]"),
+                                       QStringLiteral("Directory")));
+        });
     }
     // [AI-generated, end]
 #endif

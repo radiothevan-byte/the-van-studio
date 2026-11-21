@@ -61,26 +61,82 @@ public class StudioApplication extends QtApplication {
         new Thread(() -> saveLog("start", previousMixxxLog), "VanStudioLog").start();
     }
 
-    // The end of Mixxx's log file from the previous run (files/mixxx.log).
+    // Summary of Mixxx's log file from the previous run (files/mixxx.log).
+    // The full log is mostly debug timing messages, so keep the Info,
+    // Warning and Critical lines (without the most repetitive ones, which
+    // are counted instead) and the last raw lines.
     private String readPreviousMixxxLog() {
-        final long maxBytes = 1500 * 1024;
         java.io.File file = new java.io.File(getFilesDir(), "mixxx.log");
         if (!file.isFile()) {
             return null;
         }
-        try (java.io.RandomAccessFile in = new java.io.RandomAccessFile(file, "r")) {
-            long length = in.length();
-            long start = Math.max(0, length - maxBytes);
-            in.seek(start);
-            byte[] data = new byte[(int) (length - start)];
-            in.readFully(data);
-            return "===== Mixxx log of the previous run (last "
-                    + data.length / 1024 + " KB of " + length / 1024 + " KB) =====\n"
-                    + new String(data, StandardCharsets.UTF_8)
-                    + "\n===== end of Mixxx log =====";
+        final int maxImportant = 4000;
+        final int maxTail = 200;
+        final String[] noisy = {
+            "underflowHappened", "outdated position request", "Failed to start frame",
+            "Failed to make context current", "Detected anchors on an item"};
+        java.util.ArrayDeque<String> important = new java.util.ArrayDeque<>();
+        java.util.ArrayDeque<String> tail = new java.util.ArrayDeque<>();
+        java.util.TreeMap<String, Integer> noisyCounts = new java.util.TreeMap<>();
+        long lines = 0;
+        try (java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(
+                 new java.io.FileInputStream(file), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                lines++;
+                tail.addLast(line);
+                if (tail.size() > maxTail) {
+                    tail.removeFirst();
+                }
+                boolean isImportant = line.contains(" Info [") || line.contains(" Warning [")
+                    || line.contains(" Critical [") || line.contains(" Fatal [")
+                    // Debug lines about recording and sound devices too.
+                    || line.contains("Recording") || line.contains("record")
+                    || line.contains("SoundManager") || line.contains("SoundDevice")
+                    || line.contains("Microphone") || line.contains("EngineSideChain");
+                if (!isImportant) {
+                    continue;
+                }
+                String noisyKey = null;
+                for (String pattern : noisy) {
+                    if (line.contains(pattern)) {
+                        noisyKey = pattern;
+                        break;
+                    }
+                }
+                if (noisyKey != null) {
+                    if (noisyKey.equals("underflowHappened")) {
+                        int index = line.indexOf("code:");
+                        noisyKey = index >= 0 ? "underflowHappened " + line.substring(index).trim()
+                                              : noisyKey;
+                    }
+                    noisyCounts.merge(noisyKey, 1, Integer::sum);
+                    continue;
+                }
+                important.addLast(line);
+                if (important.size() > maxImportant) {
+                    important.removeFirst();
+                }
+            }
         } catch (Exception e) {
             return "Could not read the previous Mixxx log: " + e;
         }
+        StringBuilder text = new StringBuilder();
+        text.append("===== Mixxx log of the previous run: ").append(lines).append(" lines, ").append(file.length() / 1024).append(" KB =====\n");
+        text.append("--- Repeated messages (count) ---\n");
+        for (java.util.Map.Entry<String, Integer> entry : noisyCounts.entrySet()) {
+            text.append(entry.getValue()).append("  ").append(entry.getKey()).append('\n');
+        }
+        text.append("--- Info, warnings and errors (last ").append(maxImportant).append(") ---\n");
+        for (String line : important) {
+            text.append(line).append('\n');
+        }
+        text.append("--- Last ").append(maxTail).append(" lines ---\n");
+        for (String line : tail) {
+            text.append(line).append('\n');
+        }
+        text.append("===== end of Mixxx log =====");
+        return text.toString();
     }
 
     private void saveLog(String kind, String header) {
