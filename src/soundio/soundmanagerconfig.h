@@ -110,6 +110,12 @@ class SoundManagerConfig {
     bool hasMicInputs();
     bool hasExternalRecordBroadcast();
     void loadDefaults(SoundManager* soundManager, unsigned int flags);
+#ifdef __ANDROID__
+    // THE VAN STUDIO [AI-generated]: route the phone's built-in microphone
+    // to Microphone 1 if no microphone input is configured yet. Returns true
+    // if an input was added.
+    bool addDefaultAndroidMicrophone(SoundManager* soundManager);
+#endif
 
   private:
     QFileInfo m_configFile;

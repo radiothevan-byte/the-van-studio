@@ -38,6 +38,18 @@ DlgPrefRecord::DlgPrefRecord(QWidget* parent, UserSettingsPointer pConfig)
         recordingsPath = recordDir.absolutePath();
         m_pConfig->setValue(ConfigKey(RECORDING_PREF_KEY, "Directory"), recordingsPath);
     }
+#ifdef Q_OS_ANDROID
+    // THE VAN STUDIO [AI-generated, start]
+    // On Android the default above is inside the app's private folder
+    // (Android/data/...), which file managers hide and uninstalling deletes.
+    // Use the shared Music folder instead, unless the user chose another one.
+    if (recordingsPath.contains(QStringLiteral("/Android/data/"))) {
+        recordingsPath = QStringLiteral("/storage/emulated/0/Music/THE VAN STUDIO");
+        m_pConfig->setValue(ConfigKey(RECORDING_PREF_KEY, "Directory"), recordingsPath);
+        qInfo() << "Recordings folder moved to" << recordingsPath;
+    }
+    // [AI-generated, end]
+#endif
     LineEditRecordings->setText(recordingsPath);
     connect(PushButtonBrowseRecordings,
             &QAbstractButton::clicked,

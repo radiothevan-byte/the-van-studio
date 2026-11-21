@@ -611,6 +611,11 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
             }
         }
     }
+#ifdef __ANDROID__
+    if (flags & SoundManagerConfig::DEVICES) {
+        addDefaultAndroidMicrophone(soundManager);
+    }
+#endif
     if (flags & SoundManagerConfig::OTHER) {
         QList<mixxx::audio::SampleRate> sampleRates = soundManager->getSampleRates(m_api);
         if (sampleRates.contains(defaultSampleRate)) {
@@ -629,6 +634,37 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
     m_syncBuffers = kDefaultSyncBuffers;
     m_forceNetworkClock = false;
 }
+
+#ifdef __ANDROID__
+// THE VAN STUDIO [AI-generated, start]
+bool SoundManagerConfig::addDefaultAndroidMicrophone(SoundManager* soundManager) {
+    for (auto it = m_inputs.constBegin(); it != m_inputs.constEnd(); ++it) {
+        if (it.value().getType() == AudioPathType::Microphone) {
+            return false;
+        }
+    }
+    const QList<SoundDevicePointer> inputDevices =
+            soundManager->getDeviceList(m_api, false, true);
+    for (const auto& pDevice : inputDevices) {
+        // Registered by PortAudioEnumerator as "<product>: Microphone".
+        if (!pDevice->getDisplayName().endsWith(QStringLiteral(": Microphone")) ||
+                pDevice->getNumInputChannels() < 1) {
+            continue;
+        }
+        AudioInput micIn(AudioPathType::Microphone,
+                0,
+                mixxx::audio::ChannelCount::mono(),
+                0);
+        addInput(pDevice->getDeviceId(), micIn);
+        qInfo() << "SoundManagerConfig: default microphone input"
+                << pDevice->getDisplayName();
+        return true;
+    }
+    qInfo() << "SoundManagerConfig: no built-in microphone found";
+    return false;
+}
+// [AI-generated, end]
+#endif
 
 QSet<SoundDeviceId> SoundManagerConfig::getDevices() const {
     QSet<SoundDeviceId> devices;

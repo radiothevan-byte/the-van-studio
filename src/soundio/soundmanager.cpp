@@ -580,6 +580,17 @@ void SoundManager::checkConfig() {
         qInfo() << "SoundManager: no audio API configured, loading Android defaults";
         m_config.loadDefaults(this, SoundManagerConfig::API | SoundManagerConfig::DEVICES);
     }
+    // Builds before this one configured no microphone input, so the MIC
+    // button had no effect. Add the built-in microphone once; if the user
+    // removes it later in Sound hardware, it is not added again.
+    const ConfigKey micDefaultKey(QStringLiteral("[VanStudio]"),
+            QStringLiteral("DefaultMicrophoneApplied"));
+    if (!m_pConfig->getValue<bool>(micDefaultKey, false)) {
+        if (m_config.addDefaultAndroidMicrophone(this)) {
+            m_config.writeToDisk();
+        }
+        m_pConfig->setValue(micDefaultKey, true);
+    }
     // [AI-generated, end]
 #endif
     if (!m_config.checkAPI()) {
