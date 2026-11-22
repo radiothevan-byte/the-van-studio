@@ -115,6 +115,10 @@ class SoundManagerConfig {
     // to Microphone 1 if no microphone input is configured yet. Returns true
     // if an input was added.
     bool addDefaultAndroidMicrophone(SoundManager* soundManager);
+    // THE VAN STUDIO [AI-generated]: if wired headphones are plugged in but
+    // the main output is the phone's speaker, move the main output to the
+    // headphones. Returns true if the configuration changed.
+    bool preferAndroidHeadphones(SoundManager* soundManager);
 #endif
 
   private:

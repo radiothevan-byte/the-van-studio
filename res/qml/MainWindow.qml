@@ -369,6 +369,74 @@ Item {
                         anchors.fill: parent
 
                         onClicked: studioMicTalkover.value = micButton.micOn ? 0 : 1
+                        // Hold for the microphone gain.
+                        onPressAndHold: micGainPopup.open()
+                    }
+                    Popup {
+                        id: micGainPopup
+
+                        padding: 16
+                        width: 300
+                        x: parent.width - width
+                        y: parent.height + 8
+
+                        background: Rectangle {
+                            border.color: Theme.yellow
+                            color: Theme.backgroundColor
+                            radius: 14
+                        }
+                        contentItem: ColumnLayout {
+                            spacing: 8
+
+                            Text {
+                                color: Theme.yellow
+                                font.bold: true
+                                font.letterSpacing: 1
+                                font.pixelSize: 13
+                                text: qsTr("MIC GAIN")
+                            }
+                            Text {
+                                color: Theme.textColor
+                                font.pixelSize: 22
+                                font.bold: true
+                                text: (studioMicPregain.value > 0 ? (20 * Math.log(studioMicPregain.value) / Math.LN10).toFixed(1) : "-∞") + " dB"
+                            }
+                            Slider {
+                                Layout.fillWidth: true
+                                from: 0
+                                to: 1
+                                value: studioMicPregain.parameter
+
+                                onMoved: studioMicPregain.parameter = value
+                            }
+                            Rectangle {
+                                // Live level, to set the gain while speaking.
+                                Layout.fillWidth: true
+                                color: Theme.surface2Color
+                                implicitHeight: 8
+                                radius: 4
+
+                                Rectangle {
+                                    color: studioMicVu.value > 0.9 ? Theme.liveColor : Theme.accentColor
+                                    height: parent.height
+                                    radius: 4
+                                    width: parent.width * Math.min(1, Math.max(0, studioMicVu.value))
+                                }
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                color: Theme.textDimColor
+                                font.pixelSize: 12
+                                text: qsTr("0 dB is the normal level. Keep the bar out of the red while you speak.")
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                    Mixxx.ControlProxy {
+                        id: studioMicPregain
+
+                        group: "[Microphone]"
+                        key: "pregain"
                     }
                     Mixxx.ControlProxy {
                         id: studioMicTalkover

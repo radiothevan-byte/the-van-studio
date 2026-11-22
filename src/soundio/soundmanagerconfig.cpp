@@ -22,6 +22,16 @@ bool androidDeviceHasType(const SoundDevicePointer& pDevice, const char* typeNam
     return name.endsWith(QStringLiteral(": ") + QString::fromLatin1(typeName)) ||
             name.endsWith(QStringLiteral(": ") + QObject::tr(typeName));
 }
+
+bool isAndroidHeadphoneDevice(const SoundDevicePointer& pDevice) {
+    return androidDeviceHasType(pDevice, "Wired headphones") ||
+            androidDeviceHasType(pDevice, "Wired headset");
+}
+
+bool isAndroidSpeakerDevice(const SoundDevicePointer& pDevice) {
+    return androidDeviceHasType(pDevice, "Speaker") ||
+            androidDeviceHasType(pDevice, "Earpiece");
+}
 // [AI-generated, end]
 } // namespace
 #endif
@@ -599,11 +609,21 @@ void SoundManagerConfig::loadDefaults(SoundManager* soundManager, unsigned int f
             // Prefer the phone's built-in loudspeaker, so the first start
             // plays from the speaker without extra hardware (the earpiece or
             // a remote submix would otherwise be picked if listed first).
+            // Wired headphones come first when they are plugged in, so the
+            // microphone can be monitored without feedback from the speaker.
             QList<SoundDevicePointer> orderedDevices;
             for (const auto& pDevice : outputDevices) {
+                if (isAndroidHeadphoneDevice(pDevice)) {
+                    orderedDevices.append(pDevice);
+                }
+            }
+            for (const auto& pDevice : outputDevices) {
                 if (androidDeviceHasType(pDevice, "Speaker")) {
-                    orderedDevices.prepend(pDevice);
-                } else {
+                    orderedDevices.append(pDevice);
+                }
+            }
+            for (const auto& pDevice : outputDevices) {
+                if (!orderedDevices.contains(pDevice)) {
                     orderedDevices.append(pDevice);
                 }
             }
@@ -678,6 +698,47 @@ bool SoundManagerConfig::addDefaultAndroidMicrophone(SoundManager* soundManager)
     }
     qInfo() << "SoundManagerConfig: no built-in microphone found";
     return false;
+}
+
+bool SoundManagerConfig::preferAndroidHeadphones(SoundManager* soundManager) {
+    SoundDevicePointer pHeadphones;
+    for (const auto& pDevice : soundManager->getDeviceList(m_api, true, false)) {
+        if (isAndroidHeadphoneDevice(pDevice) && pDevice->getNumOutputChannels() >= 2) {
+            pHeadphones = pDevice;
+            break;
+        }
+    }
+    if (!pHeadphones) {
+        return false;
+    }
+    QList<SoundDeviceId> movedFrom;
+    QList<AudioOutput> movedOutputs;
+    for (auto it = m_outputs.constBegin(); it != m_outputs.constEnd(); ++it) {
+        const SoundDeviceId& deviceId = it.key();
+        bool isBuiltIn = false;
+        for (const auto& pDevice : soundManager->getDeviceList(m_api, true, false)) {
+            if (pDevice->getDeviceId() == deviceId && isAndroidSpeakerDevice(pDevice)) {
+                isBuiltIn = true;
+                break;
+            }
+        }
+        if (isBuiltIn) {
+            movedFrom.append(deviceId);
+            movedOutputs.append(it.value());
+        }
+    }
+    if (movedOutputs.isEmpty()) {
+        return false;
+    }
+    for (const auto& deviceId : std::as_const(movedFrom)) {
+        m_outputs.remove(deviceId);
+    }
+    for (const auto& output : std::as_const(movedOutputs)) {
+        addOutput(pHeadphones->getDeviceId(), output);
+    }
+    qInfo() << "SoundManagerConfig: wired headphones found, outputs moved to"
+            << pHeadphones->getDisplayName();
+    return true;
 }
 // [AI-generated, end]
 #endif

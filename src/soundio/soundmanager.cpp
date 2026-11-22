@@ -593,6 +593,12 @@ void SoundManager::checkConfig() {
         m_config.writeToDisk();
         m_pConfig->setValue(micDefaultKey, true);
     }
+    // With wired headphones plugged in at start, play through them instead of
+    // the phone's speaker: the microphone can then be monitored without
+    // feedback. Without headphones the configured speaker is kept.
+    if (m_config.preferAndroidHeadphones(this)) {
+        m_config.writeToDisk();
+    }
     // [AI-generated, end]
 #endif
     if (!m_config.checkAPI()) {
